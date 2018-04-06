@@ -31,7 +31,7 @@ namespace YAMLParser
       {
           System.Threading.Thread.Sleep(1);
       }*/
-      
+
       bool interactive = false; //wait for ENTER press when complete
       int firstarg = 0;
       if( args.Length >= 1 )
@@ -70,9 +70,9 @@ namespace YAMLParser
         solutiondir = yamlparser_parent;
       }
 
-      Templates.LoadTemplateStrings( Path.Combine( solutiondir, "YAMLParser", "TemplateProject" ) );
+      Templates.LoadTemplateStrings( Path.Combine( yamlparser_parent, "YAMLParser", "TemplateProject" ) );
 
-      outputdir = Path.Combine( solutiondir, outputdir );
+      outputdir = Path.Combine( yamlparser_parent, outputdir );
       var paths = new List<MsgFileLocation>();
       var pathssrv = new List<MsgFileLocation>();
       var actionFileLocations = new List<MsgFileLocation>();
