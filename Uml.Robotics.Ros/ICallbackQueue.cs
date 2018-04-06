@@ -2,15 +2,15 @@
 
 namespace Uml.Robotics.Ros
 {
-    public interface ICallbackQueue
-    {
-        void AddCallback(CallbackInterface callback);
-        void CallAvailable(int timeout = ROS.WallDuration);
+  public interface ICallbackQueue
+  {
+    void AddCallback( CallbackInterface callback );
+    void CallAvailable( int timeout = ROS.WallDuration );
 
-        void RemoveById(long ownerId);
+    void RemoveById( long ownerId );
 
-        void Enable();
-        void Disable();
-        void Clear();
-    }
+    void Enable();
+    void Disable();
+    void Clear();
+  }
 }

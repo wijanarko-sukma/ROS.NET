@@ -1,26 +1,124 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C8E5C1D2-80C2-4C11-ACF2-2DC3B7560BEF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Uml.Robotics.Ros</RootNamespace>
+    <AssemblyName>Uml.Robotics.Ros</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Collections" Version="4.3.0" />
-    <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
-    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+    <Reference Include="Messages, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Messages\Messages.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Uml.Robotics.Ros.MessageBase\Uml.Robotics.Ros.MessageBase.csproj" />
-    <ProjectReference Include="..\Uml.Robotics.XmlRpc\Uml.Robotics.XmlRpc.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
-    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <Compile Include="ActionLib\ActionClient.cs" />
+    <Compile Include="ActionLib\ActionServer.cs" />
+    <Compile Include="ActionLib\ClientGoalHandle.cs" />
+    <Compile Include="ActionLib\Interfaces\IActionClient.cs" />
+    <Compile Include="ActionLib\Interfaces\IActionServer.cs" />
+    <Compile Include="ActionLib\ServerGoalHandle.cs" />
+    <Compile Include="AdvertiseOptions.cs" />
+    <Compile Include="AdvertiseServiceOptions.cs" />
+    <Compile Include="CallbackInterface.cs" />
+    <Compile Include="CallbackQueue.cs" />
+    <Compile Include="CallbackQueueHelper.cs" />
+    <Compile Include="CallbackQueueThreaded.cs" />
+    <Compile Include="Connection.cs" />
+    <Compile Include="ConnectionManager.cs" />
+    <Compile Include="Header.cs" />
+    <Compile Include="ICallbackQueue.cs" />
+    <Compile Include="LocalPublisherLink.cs" />
+    <Compile Include="LocalSubscriberLink.cs" />
+    <Compile Include="Master.cs" />
+    <Compile Include="MessageAndSerializerFunc.cs" />
+    <Compile Include="Names.cs" />
+    <Compile Include="Network.cs" />
+    <Compile Include="NodeHandle.cs" />
+    <Compile Include="Param.cs" />
+    <Compile Include="PendingConnection.cs" />
+    <Compile Include="PollManager.cs" />
+    <Compile Include="PollSet.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Publication.cs" />
+    <Compile Include="Publisher.cs" />
+    <Compile Include="PublisherLink.cs" />
+    <Compile Include="RemappingHelper.cs" />
+    <Compile Include="RosException.cs" />
+    <Compile Include="RosOutAppender.cs" />
+    <Compile Include="Service.cs" />
+    <Compile Include="ServiceCallbackHelper.cs" />
+    <Compile Include="ServiceClient.cs" />
+    <Compile Include="ServiceClientLink.cs" />
+    <Compile Include="ServiceClientOptions.cs" />
+    <Compile Include="ServiceManager.cs" />
+    <Compile Include="ServicePublication.cs" />
+    <Compile Include="ServiceServer.cs" />
+    <Compile Include="ServiceServerLink.cs" />
+    <Compile Include="SingleSubscriberPublisher.cs" />
+    <Compile Include="Socket.cs" />
+    <Compile Include="SocketAPMExtensions.cs" />
+    <Compile Include="Spinner.cs" />
+    <Compile Include="SubscribeOptions.cs" />
+    <Compile Include="Subscriber.cs" />
+    <Compile Include="SubscriberCallbacks.cs" />
+    <Compile Include="SubscriberLink.cs" />
+    <Compile Include="Subscription.cs" />
+    <Compile Include="SubscriptionCallbackHelper.cs" />
+    <Compile Include="TcpTransport.cs" />
+    <Compile Include="ThisNode.cs" />
+    <Compile Include="Time.cs" />
+    <Compile Include="TimerManager.cs" />
+    <Compile Include="TopicInfo.cs" />
+    <Compile Include="TopicManager.cs" />
+    <Compile Include="TransportPublisherLink.cs" />
+    <Compile Include="TransportSubscriberLink.cs" />
+    <Compile Include="XmlRpcManager.cs" />
+    <Compile Include="_Init.cs" />
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\Uml.Robotics.Ros.MessageBase\Uml.Robotics.Ros.MessageBase.csproj">
+      <Project>{fe6b7734-bd13-4f75-aa2c-9e8e314053f0}</Project>
+      <Name>Uml.Robotics.Ros.MessageBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Uml.Robotics.XmlRpc\Uml.Robotics.XmlRpc.csproj">
+      <Project>{cfd4a5b7-67f9-474a-a6b9-b9d7de16282d}</Project>
+      <Name>Uml.Robotics.XmlRpc</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
