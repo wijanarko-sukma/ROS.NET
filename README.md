@@ -1,16 +1,11 @@
-## Experimental Fork of ROS.NET for .NET Core 1.1 maintained by Xamla
+## .NET Framework Fork of ROS.NET maintained by [Xamla][1]
 
-This fork is a modified version of ROS.NET that builds and runs on Windows and Linux with .NET Core 1.1 SDK installed. Beside changes required to compile the solution for .NET core the project was completely restructured (e.g. folder structure, assembly names). A couple of bugs were fixed and offensive exception messages and comments of the original implementation were replaced by more serious ones.
+This fork is a reverted version of ROS.NET from .NET Core to .NET Framework A couple of bugs were fixed and offensive exception messages and comments of the original implementation were replaced by more serious ones.
 
-## .NET Core 1.1 Build Instructions
+## Requirements
 
-1. `cd YAMLParser`
-2. `dotnet restore`
-3. `dotnet build`
-4. `dotnet run -- Debug <YourPathToSolutionRoot>`
-5. `cd ..`
-5. `dotnet restore Uml.Robotics.Ros.sln`
-6. `dotnet build Uml.Robotics.Ros.sln` (build should succeed now)
+1. `Visual Studio 2017 (Professional / Community Edition)`
+2. `.NET Framework v4.7.1`
 
 
 ##  ==== Original Readme text ======
@@ -72,3 +67,5 @@ Enjoy!
 -Eric McCann (a.k.a. nuclearmistake) @ the University of Massachusetts Lowell Robotics Lab
 
 P.S.: If anyone has the strong urge, strong C# chops, and likes to read code and hack it to bits... This codebase could really use a revised YAMLParser that can avoid the significant knot of introspection occurring in SerializationHelper. Unfortunately, the gains from such a rewrite place it at around 53 on my priority queue of things to do... but I might get to it someday if nobody is itching to change how it is now.
+
+[1]: https://github.com/Xamla/ROS.NET "Xamla"
