@@ -187,9 +187,9 @@ namespace Uml.Robotics.Ros
           return true;
         }
 
-        if( typeof( T ) == typeof( int ) )
+        if( typeof( T ) == typeof( double ) )
         {
-          dest = (T)(object)v.GetInt();
+          dest = (T)(object)v.GetDouble();
         }
         else if( typeof( T ) == typeof( string ) )
         {
