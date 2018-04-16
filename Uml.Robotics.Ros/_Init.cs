@@ -337,9 +337,9 @@ namespace Uml.Robotics.Ros
     /// </summary>
     /// <param name="args"> argv - parsed for remapping args (AND PARAMS??) </param>
     /// <param name="name"> the node's name </param>
-    public static void Init( string[] args, string name )
+    public static void Init( ref string[] args, string name )
     {
-      Init( args, name, 0 );
+      Init( ref args, name, 0 );
     }
 
     /// <summary>
@@ -348,7 +348,7 @@ namespace Uml.Robotics.Ros
     /// <param name="args"> argv - parsed for remapping args (AND PARAMS??) </param>
     /// <param name="name"> the node's name </param>
     /// <param name="options"> options? </param>
-    public static void Init( string[] args, string name, int options )
+    public static void Init( ref string[] args, string name, int options )
     {
       // ROS_MASTER_URI/ROS_HOSTNAME definition precedence:
       // 1. explicitely set by program
