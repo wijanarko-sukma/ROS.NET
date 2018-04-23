@@ -11,6 +11,7 @@ namespace Uml.Robotics.Ros.ActionLib
       where TResult : InnerActionMessage, new()
       where TFeedback : InnerActionMessage, new()
   {
+    string Name { get; }
     Publisher<GoalActionMessage<TGoal>> GoalPublisher { get; }
     Publisher<GoalID> CancelPublisher { get; }
     void TransitionToState( ClientGoalHandle<TGoal, TResult, TFeedback> goalHandle, CommunicationState state );

@@ -2,20 +2,26 @@
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+
 using Messages;
 using Messages.actionlib_msgs;
 using Messages.std_msgs;
 using System.Threading;
-
 using System.Threading.Tasks;
 
 namespace Uml.Robotics.Ros.ActionLib
 {
-  public class ActionClient<TGoal, TResult, TFeedback> : IActionClient<TGoal, TResult, TFeedback>
+  public class ActionClient<TGoal, TResult, TFeedback>
+      : IActionClient<TGoal, TResult, TFeedback>
+      , IDisposable
       where TGoal : InnerActionMessage, new()
       where TResult : InnerActionMessage, new()
       where TFeedback : InnerActionMessage, new()
   {
+    private static int nextGoalId = 0; // Shared among all clients
+    private static object lockId = new object();
+
     public string Name { get; private set; }
     public int QueueSize { get; private set; }
     public Publisher<GoalActionMessage<TGoal>> GoalPublisher { get; private set; }
@@ -32,11 +38,8 @@ namespace Uml.Robotics.Ros.ActionLib
     private Subscriber statusSubscriber;
     private Subscriber feedbackSubscriber;
     private Subscriber resultSubscriber;
-    private int nextGoalId = 0; // Shared among all clients
     private string statusCallerId = null;
-    private Object lockId = new Object();
-    private Object lockGoalHandles = new Object();
-
+    private object lockGoalHandles = new object();
 
     public ActionClient( string name, NodeHandle parentNodeHandle, int queueSize = 50 )
     {
@@ -85,8 +88,7 @@ namespace Uml.Robotics.Ros.ActionLib
     /// </summary>
     public void CancelGoalsAtAndBeforeTime()
     {
-      var time = DateTime.UtcNow;
-      CancelGoalsAtAndBeforeTime( ROS.GetTime( time ) );
+      CancelGoalsAtAndBeforeTime( ROS.GetTime() );
     }
 
 
@@ -96,31 +98,41 @@ namespace Uml.Robotics.Ros.ActionLib
     }
 
 
-    private ClientGoalHandle<TGoal, TResult, TFeedback> SendGoal( TGoal goal,
-        Action<ClientGoalHandle<TGoal, TResult, TFeedback>> OnTransistionCallback,
-        Action<ClientGoalHandle<TGoal, TResult, TFeedback>, FeedbackActionMessage<TFeedback>> OnFeedbackCallback )
+    public ClientGoalHandle<TGoal, TResult, TFeedback> SendGoal(
+        TGoal goal,
+        Action<ClientGoalHandle<TGoal, TResult, TFeedback>> OnTransistionCallback = null,
+        Action<ClientGoalHandle<TGoal, TResult, TFeedback>, FeedbackActionMessage<TFeedback>> OnFeedbackCallback = null
+    )
     {
       // Create Goal Message;
       var goalId = new GoalID();
+
       lock( lockId )
       {
         var now = ROS.GetTime();
-        goalId.id = $"{ThisNode.Name}-{nextGoalId}-{now.data.sec}.{now.data.nsec}";
+
+        // Create sortable goal id
+        goalId.id = $"{ThisNode.Name}-{nextGoalId:x08}-{now.data.sec:x08}.{now.data.nsec:x08}";
         goalId.stamp = now;
         nextGoalId = nextGoalId + 1;
       }
 
-      // Prepaer Goal Message
+      // Prepare Goal Message
       var goalAction = new GoalActionMessage<TGoal>();
       goalAction.Header = new Messages.std_msgs.Header();
       goalAction.Header.stamp = ROS.GetTime();
       goalAction.GoalId = goalId;
       goalAction.Goal = goal;
 
+
       // Register goal message
-      var goalHandle = new ClientGoalHandle<TGoal, TResult, TFeedback>( this, goalAction,
-          OnTransistionCallback, OnFeedbackCallback
+      var goalHandle = new ClientGoalHandle<TGoal, TResult, TFeedback>(
+          this,
+          goalAction,
+          OnTransistionCallback,
+          OnFeedbackCallback
       );
+
       lock( lockGoalHandles )
       {
         goalHandles[goalAction.GoalId.id] = goalHandle;
@@ -142,6 +154,12 @@ namespace Uml.Robotics.Ros.ActionLib
       GoalPublisher.shutdown();
       CancelPublisher.shutdown();
       nodeHandle.shutdown();
+    }
+
+
+    void IDisposable.Dispose()
+    {
+      Shutdown();
     }
 
 
@@ -257,8 +275,7 @@ namespace Uml.Robotics.Ros.ActionLib
     public void TransitionToState( ClientGoalHandle<TGoal, TResult, TFeedback> goalHandle, CommunicationState nextState )
     {
       ROS.Debug()( $"Transitioning CommState from {goalHandle.State} to {nextState}" );
-      goalHandle.State = nextState;
-      goalHandle.OnTransitionCallback?.Invoke( goalHandle );
+      goalHandle.FireTransitionCallback( nextState );
     }
 
 
@@ -395,9 +412,9 @@ namespace Uml.Robotics.Ros.ActionLib
       {
         goalExists = goalHandles.TryGetValue( feedback.GoalStatus.goal_id.id, out goalHandle );
       }
-      if( goalExists && ( goalHandle.OnFeedbackCallback != null ) )
+      if( goalExists )
       {
-        goalHandle.OnFeedbackCallback( goalHandle, feedback );
+        goalHandle.FireFeedback( goalHandle, feedback );
       }
     }
 
@@ -571,47 +588,19 @@ namespace Uml.Robotics.Ros.ActionLib
     }
 
     public async Task<TResult> SendGoalAsync(
-       TGoal goal,
-       Action<ClientGoalHandle<TGoal, TResult, TFeedback>> OnTransistionCallback = null,
-       Action<ClientGoalHandle<TGoal, TResult, TFeedback>, FeedbackActionMessage<TFeedback>> OnFeedbackCallback = null,
-       CancellationToken cancel = default( CancellationToken )
+        TGoal goal,
+        Action<ClientGoalHandle<TGoal, TResult, TFeedback>> onTransistionCallback = null,
+        Action<ClientGoalHandle<TGoal, TResult, TFeedback>, FeedbackActionMessage<TFeedback>> onFeedbackCallback = null,
+        CancellationToken cancel = default( CancellationToken )
     )
     {
-      var tcs = new TaskCompletionSource<TResult>();
       if( !await this.WaitForActionServerToStartAsync( TimeSpan.FromSeconds( 3 ) ) )
         throw new TimeoutException( $"Action server {this.Name} is not available." );
 
-      void OnTransistion( ClientGoalHandle<TGoal, TResult, TFeedback> goalHandle )
-      {
-        if( goalHandle.State == CommunicationState.DONE && !tcs.Task.IsCompleted )
-        {
-          var goalStatus = goalHandle.LatestGoalStatus;
-          if( goalStatus?.status == Messages.actionlib_msgs.GoalStatus.SUCCEEDED )
-          {
-            var result = goalHandle.Result;
-            tcs.SetResult( result );
-          }
-          else if( goalStatus?.status == Messages.actionlib_msgs.GoalStatus.PREEMPTED )
-          {
-            tcs.SetCanceled();
-          }
-          else
-          {
-            tcs.SetException( new ActionFailedExeption( this.Name, goalStatus ) );
-          }
-        }
-        OnTransistionCallback?.Invoke( goalHandle );
-      }
-
-      void OnFeedback( ClientGoalHandle<TGoal, TResult, TFeedback> goalHandle, FeedbackActionMessage<TFeedback> feedback )
-      {
-        OnFeedbackCallback?.Invoke( goalHandle, feedback );
-      }
-
-      var gh = this.SendGoal( goal, OnTransistion, OnFeedback );
+      var gh = this.SendGoal( goal, onTransistionCallback, onFeedbackCallback );
       using( cancel.Register( gh.Cancel ) )
       {
-        return await tcs.Task;
+        return await gh.GoalTask;
       }
     }
 
@@ -819,14 +808,18 @@ namespace Uml.Robotics.Ros.ActionLib
       else if( goalHandle.State == CommunicationState.WAITING_FOR_CANCEL_ACK )
       {
 
-        if( goalStatus.status == GoalStatus.PENDING ||
-            goalStatus.status == GoalStatus.ACTIVE )
+        if(
+            goalStatus.status == GoalStatus.PENDING ||
+            goalStatus.status == GoalStatus.ACTIVE
+        )
         {
           // NOP
         }
-        else if( goalStatus.status == GoalStatus.SUCCEEDED ||
-          goalStatus.status == GoalStatus.ABORTED ||
-          goalStatus.status == GoalStatus.PREEMPTED )
+        else if(
+            goalStatus.status == GoalStatus.SUCCEEDED ||
+            goalStatus.status == GoalStatus.ABORTED ||
+            goalStatus.status == GoalStatus.PREEMPTED
+        )
         {
           TransitionToState( goalHandle, CommunicationState.PREEMPTING );
           TransitionToState( goalHandle, CommunicationState.WAITING_FOR_RESULT );
@@ -852,7 +845,6 @@ namespace Uml.Robotics.Ros.ActionLib
         {
           ROS.Error()( "BUG: Got an unknown State from the ActionServer. status = %u", goalStatus.status );
         }
-
 
       }
       else if( goalHandle.State == CommunicationState.RECALLING )
@@ -866,9 +858,11 @@ namespace Uml.Robotics.Ros.ActionLib
         {
           ROS.Error()( "Invalid Transition from RECALLING to ACTIVE" );
         }
-        else if( goalStatus.status == GoalStatus.SUCCEEDED ||
-          goalStatus.status == GoalStatus.ABORTED ||
-          goalStatus.status == GoalStatus.PREEMPTED )
+        else if(
+            goalStatus.status == GoalStatus.SUCCEEDED ||
+            goalStatus.status == GoalStatus.ABORTED ||
+            goalStatus.status == GoalStatus.PREEMPTED
+        )
         {
           TransitionToState( goalHandle, CommunicationState.PREEMPTING );
           TransitionToState( goalHandle, CommunicationState.WAITING_FOR_RESULT );
@@ -893,7 +887,6 @@ namespace Uml.Robotics.Ros.ActionLib
         {
           ROS.Error()( "BUG: Got an unknown State from the ActionServer. status = %u", goalStatus.status );
         }
-
 
       }
       else if( goalHandle.State == CommunicationState.PREEMPTING )
@@ -919,9 +912,11 @@ namespace Uml.Robotics.Ros.ActionLib
         {
           ROS.Error()( "Invalid Transition from PREEMPTING to RECALLED" );
         }
-        else if( goalStatus.status == GoalStatus.PREEMPTED ||
-          goalStatus.status == GoalStatus.SUCCEEDED ||
-          goalStatus.status == GoalStatus.ABORTED )
+        else if(
+            goalStatus.status == GoalStatus.PREEMPTED ||
+            goalStatus.status == GoalStatus.SUCCEEDED ||
+            goalStatus.status == GoalStatus.ABORTED
+        )
         {
           TransitionToState( goalHandle, CommunicationState.WAITING_FOR_RESULT );
         }
@@ -933,7 +928,6 @@ namespace Uml.Robotics.Ros.ActionLib
         {
           ROS.Error()( "BUG: Got an unknown State from the ActionServer. status = %u", goalStatus.status );
         }
-
 
       }
       else if( goalHandle.State == CommunicationState.DONE )
@@ -955,11 +949,13 @@ namespace Uml.Robotics.Ros.ActionLib
         {
           ROS.Error()( "Invalid Transition from DONE to PREEMPTING" );
         }
-        else if( goalStatus.status == GoalStatus.PREEMPTED ||
-          goalStatus.status == GoalStatus.SUCCEEDED ||
-          goalStatus.status == GoalStatus.ABORTED ||
-          goalStatus.status == GoalStatus.RECALLED ||
-          goalStatus.status == GoalStatus.REJECTED )
+        else if(
+            goalStatus.status == GoalStatus.PREEMPTED ||
+            goalStatus.status == GoalStatus.SUCCEEDED ||
+            goalStatus.status == GoalStatus.ABORTED ||
+            goalStatus.status == GoalStatus.RECALLED ||
+            goalStatus.status == GoalStatus.REJECTED
+        )
         {
           // NOP
         }
@@ -967,7 +963,6 @@ namespace Uml.Robotics.Ros.ActionLib
         {
           ROS.Error()( "BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
         }
-
 
       }
       else
