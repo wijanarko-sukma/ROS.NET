@@ -31,26 +31,42 @@ namespace YAMLParser
       {
           System.Threading.Thread.Sleep(1);
       }*/
-
+      List<string> exclusionFilters = new List<string>();
+      List<string> sources = new List<string>();
       bool interactive = false; //wait for ENTER press when complete
       int firstarg = 0;
       if( args.Length >= 1 )
       {
-        if( args[firstarg].Trim().Equals( "-i" ) )
+        Dictionary<string, List<string>> arguments = ParseArguments( args );
+
+        foreach( KeyValuePair<string, List<string>> data in arguments )
         {
-          interactive = true;
-          firstarg++;
-        }
-        if( firstarg < args.Length - 1 )
-        {
-          configuration = args[firstarg++];
-        }
-        if( firstarg < args.Length - 1 && args[firstarg].Trim().Equals( "-i" ) )
-        {
-          interactive = true;
-          firstarg++;
+          if( data.Key.Trim().Equals( "-i" ) )
+          {
+            interactive = true;
+          }
+          else if( data.Key.Trim().Equals( "-c" ) )
+          {
+            if( data.Value.Count > 0 )
+            {
+              configuration = data.Value[0];
+            }
+            else
+            {
+              configuration = "Debug";
+            }
+          }
+          else if( data.Key.Trim().Equals( "-e" ) )
+          {
+            exclusionFilters.InsertRange( 0, data.Value );
+          }
+          else if( data.Key.Trim().Equals( "-s" ) )
+          {
+            sources.InsertRange( 0, data.Value );
+          }
         }
       }
+
       string yamlparser_parent = "";
       DirectoryInfo di = new DirectoryInfo( Directory.GetCurrentDirectory() );
       while( di != null && di.Name != "YAMLParser" )
@@ -61,9 +77,9 @@ namespace YAMLParser
         throw new InvalidOperationException( "Not started from within YAMLParser directory." );
       di = Directory.GetParent( di.FullName );
       yamlparser_parent = di.FullName;
-      if( args.Length - firstarg >= 1 )
+      if( sources.Count >= 1 )
       {
-        solutiondir = new DirectoryInfo( args[firstarg] ).FullName;
+        solutiondir = new DirectoryInfo( sources[0] ).FullName;
       }
       else
       {
@@ -76,12 +92,12 @@ namespace YAMLParser
       var paths = new List<MsgFileLocation>();
       var pathssrv = new List<MsgFileLocation>();
       var actionFileLocations = new List<MsgFileLocation>();
-      Console.WriteLine( "Generatinc C# classes for ROS Messages...\n" );
-      for( int i = firstarg; i < args.Length; i++ )
+      Console.WriteLine( "Generating C# classes for ROS Messages...\n" );
+      foreach( string source in sources )
       {
-        string d = new DirectoryInfo( Path.GetFullPath( args[i] ) ).FullName;
-        Console.WriteLine( "Looking in " + d );
-        MsgFileLocator.findMessages( paths, pathssrv, actionFileLocations, d );
+        string d = new DirectoryInfo( Path.GetFullPath( source ) ).FullName;
+        Console.WriteLine( $"Looking in {d}" );
+        MsgFileLocator.findMessages( paths, pathssrv, actionFileLocations, exclusionFilters, d );
       }
 
       // first pass: create all msg files (and register them in static resolver dictionary)
@@ -138,6 +154,30 @@ namespace YAMLParser
         Console.WriteLine( "Finished. Press enter." );
         Console.ReadLine();
       }
+    }
+
+    public static Dictionary<string, List<string>> ParseArguments( string[] args )
+    {
+      Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
+
+      string argCommand = "";
+      List<string> tempData = null;
+
+      foreach( string arg in args )
+      {
+        if( arg.ToArray()[0] == '-' )
+        {
+          argCommand = arg;
+          tempData = new List<string>();
+          result.Add( argCommand, tempData );
+        }
+        else
+        {
+          tempData.Add( arg );
+        }
+      }
+
+      return result;
     }
 
     public static void MakeTempDir()

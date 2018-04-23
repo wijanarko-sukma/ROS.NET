@@ -79,13 +79,28 @@ namespace YAMLParser
 
   internal static class MsgFileLocator
   {
+    private static bool checkFilter( string path, List<string> filters )
+    {
+      bool result = false;
+
+      foreach( string filter in filters )
+      {
+        if( path.Contains( filter ) )
+        {
+          result = true;
+          break;
+        }
+      }
+
+      return result;
+    }
     /// <summary>
     /// Finds all msgs and srvs below path and adds them to
     /// </summary>
     /// <param name="m"></param>
     /// <param name="s"></param>
     /// <param name="path"></param>
-    private static void explode( List<MsgFileLocation> m, List<MsgFileLocation> s, List<MsgFileLocation> actionFiles, string path )
+    private static void explode( List<MsgFileLocation> m, List<MsgFileLocation> s, List<MsgFileLocation> actionFiles, List<string> exclusionFilter, string path )
     {
       var msgfiles = Directory.GetFiles( path, "*.msg", SearchOption.AllDirectories ).Select( p => new MsgFileLocation( p, path ) ).ToArray();
       var srvfiles = Directory.GetFiles( path, "*.srv", SearchOption.AllDirectories ).Select( p => new MsgFileLocation( p, path ) ).ToArray();
@@ -94,17 +109,17 @@ namespace YAMLParser
       int mb4 = m.Count, sb4 = s.Count;
       foreach( var nm in msgfiles )
       {
-        if( !m.Contains( nm ) )
+        if( !checkFilter( nm.Path, exclusionFilter ) && !m.Contains( nm ) )
           m.Add( nm );
       }
       foreach( var ns in srvfiles )
       {
-        if( !s.Contains( ns ) )
+        if( !checkFilter( ns.Path, exclusionFilter ) && !s.Contains( ns ) )
           s.Add( ns );
       }
       foreach( var actionFile in allActionFiles )
       {
-        if( !actionFiles.Contains( actionFile ) )
+        if( !checkFilter( actionFile.Path, exclusionFilter ) && !actionFiles.Contains( actionFile ) )
         {
           actionFiles.Add( actionFile );
         }
@@ -112,7 +127,7 @@ namespace YAMLParser
       Console.WriteLine( "Skipped " + ( msgfiles.Length - ( m.Count - mb4 ) ) + " duplicate msgs and " + ( srvfiles.Length - ( s.Count - sb4 ) ) + " duplicate srvs" );
     }
 
-    public static void findMessages( List<MsgFileLocation> msgs, List<MsgFileLocation> srvs, List<MsgFileLocation> actionFiles,
+    public static void findMessages( List<MsgFileLocation> msgs, List<MsgFileLocation> srvs, List<MsgFileLocation> actionFiles, List<string> exclusionFilter,
         params string[] args )
     {
       //solution directory (where the reference to msg_gen is) is passed -- or assumed to be in a file in the same directory as the executable (which would be the case when msg_gen is directly run in the debugger
@@ -123,7 +138,7 @@ namespace YAMLParser
       }
       foreach( string arg in args )
       {
-        explode( msgs, srvs, actionFiles, new DirectoryInfo( arg ).FullName );
+        explode( msgs, srvs, actionFiles, exclusionFilter, new DirectoryInfo( arg ).FullName );
       }
     }
   }

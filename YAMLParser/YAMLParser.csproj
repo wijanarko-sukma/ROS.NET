@@ -21,7 +21,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -80,7 +80,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd "$(TargetDir)"
-if not "$(ConfigurationName)"  == "Debugger" YAMLParser.exe $(ConfigurationName) "$(SolutionDir) " "$(ProjectDir).." 
-echo YAMLParser.exe $(ConfigurationName) "$(SolutionDir) " "$(ProjectDir).."</PostBuildEvent>
+if not "$(ConfigurationName)"  == "Debugger" YAMLParser.exe -c $(ConfigurationName) -e "roswww" "rosbridge_suite" "rosauth" -s "$(SolutionDir) " "$(ProjectDir).." 
+echo YAMLParser.exe -c $(ConfigurationName) -e "roswww" "rosbridge_suite" "rosauth" -s "$(SolutionDir)" "$(ProjectDir).."</PostBuildEvent>
   </PropertyGroup>
 </Project>
