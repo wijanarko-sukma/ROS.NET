@@ -130,9 +130,7 @@ namespace Uml.Robotics.Ros.ActionLib
       newFeedback.Header.stamp = ROS.GetTime();
       newFeedback.GoalStatus = goalStatus;
       newFeedback.Feedback = feedback;
-      ROS.Debug()( "actionlib", $"Publishing feedback for goal with id: {goalStatus.goal_id.id} and stamp: " +
-          $"{new DateTimeOffset( ROS.GetTime( goalStatus.goal_id.stamp ) ).ToUnixTimeSeconds()}"
-      );
+      ROS.Debug()( $"[actionlib] Publishing feedback for goal with id: {goalStatus.goal_id.id} and stamp: {new DateTimeOffset( ROS.GetTime( goalStatus.goal_id.stamp ) ).ToUnixTimeSeconds()}" );
       feedbackPublisher.publish( newFeedback );
     }
 
@@ -147,9 +145,7 @@ namespace Uml.Robotics.Ros.ActionLib
       {
         newResult.Result = result;
       }
-      ROS.Debug()( "actionlib", $"Publishing result for goal with id: {goalStatus.goal_id.id} and stamp: " +
-          $"{new DateTimeOffset( ROS.GetTime( goalStatus.goal_id.stamp ) ).ToUnixTimeSeconds()}"
-      );
+      ROS.Debug()( $"[actionlib] Publishing result for goal with id: {goalStatus.goal_id.id} and stamp: {new DateTimeOffset( ROS.GetTime( goalStatus.goal_id.stamp ) ).ToUnixTimeSeconds()}" );
       resultPublisher.publish( newResult );
       PublishStatus();
     }
@@ -197,7 +193,7 @@ namespace Uml.Robotics.Ros.ActionLib
         return;
       }
 
-      ROS.Debug()( "actionlib", "The action server has received a new cancel request" );
+      ROS.Debug()( $"[actionlib] The action server has received a new cancel request" );
 
       if( goalId.id == null )
       {
@@ -258,7 +254,7 @@ namespace Uml.Robotics.Ros.ActionLib
 
       GoalID goalId = goalAction.GoalId;
 
-      ROS.Debug()( "actionlib", "The action server has received a new goal request" );
+      ROS.Debug()( $"[actionlib] The action server has received a new goal request" );
       ServerGoalHandle<TGoal, TResult, TFeedback> observedGoalHandle = null;
       if( goalHandles.ContainsKey( goalId.id ) )
       {
