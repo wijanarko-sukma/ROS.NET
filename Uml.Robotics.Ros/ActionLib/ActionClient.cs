@@ -195,7 +195,7 @@ namespace Uml.Robotics.Ros.ActionLib
             return false;
           }
         }
-        Thread.Sleep( 1 );
+        Thread.Sleep( 10 );
       }
 
       return false;
