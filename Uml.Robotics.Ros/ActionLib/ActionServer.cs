@@ -279,13 +279,10 @@ namespace Uml.Robotics.Ros.ActionLib
     }
 
 
-    private void SpinCallback()
+    private void SpinCallback( object state )
     {
-      if( DateTime.UtcNow > nextStatusPublishTime )
-      {
+      if( started )
         PublishStatus();
-        nextStatusPublishTime = DateTime.UtcNow + statusInterval;
-      }
     }
 
 
