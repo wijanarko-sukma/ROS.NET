@@ -25,8 +25,8 @@ namespace ActionClientTestbed
       }
 
       Console.WriteLine( "Start ROS" );
-      ROS.ROS_MASTER_URI = "http://rosvita:11311";
-      ROS.Init( new string[0], "ActionClient" );
+      
+      ROS.Init( ref args, "ActionClient" );
 
       //(new Program()).Start(1);
       ( new TestActionServerKill() ).Start( 5 );

@@ -16,7 +16,7 @@ namespace ServiceClientSample
 
       try
       {
-        ROS.Init( new string[0], NODE_NAME + DateTime.Now.Ticks );
+        ROS.Init( ref args, NODE_NAME + DateTime.Now.Ticks );
         var spinner = new AsyncSpinner();
         spinner.Start();
       }

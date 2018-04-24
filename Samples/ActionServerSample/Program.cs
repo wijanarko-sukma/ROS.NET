@@ -12,7 +12,7 @@ namespace ActionServerSample
     static void Main( string[] args )
     {
       Console.WriteLine( "Start ROS" );
-      ROS.Init( new string[0], "ActionServer" );
+      ROS.Init( ref args, "ActionServer" );
       var asyncSpinner = new AsyncSpinner();
       asyncSpinner.Start();
       NodeHandle serverNodeHandle = new NodeHandle();
