@@ -282,6 +282,7 @@ namespace Uml.Robotics.Ros.ActionLib
         var newGoalHandle = new ServerGoalHandle<TGoal, TResult, TFeedback>( this, goalId,
             goalStatus, goalAction.Goal
         );
+        newGoalHandle.DestructionTime = ROS.GetTime( goalId.stamp );
         lock( lockGoalHandles )
         {
           goalHandles[goalId.id] = newGoalHandle;
