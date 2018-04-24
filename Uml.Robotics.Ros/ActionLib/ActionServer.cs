@@ -172,7 +172,7 @@ namespace Uml.Robotics.Ros.ActionLib
       statusArray.header = new Messages.std_msgs.Header();
       statusArray.header.stamp = ROS.GetTime( now );
       var goalStatuses = new List<GoalStatus>();
-
+      
       var idsToBeRemoved = new List<string>();
       foreach( var pair in goalHandles )
       {
@@ -185,7 +185,10 @@ namespace Uml.Robotics.Ros.ActionLib
         }
       }
 
-      foreach( string id in idsToBeRemoved )
+      statusArray.status_list = goalStatuses.ToArray();
+      goalStatusPublisher.publish(statusArray);
+
+      foreach ( string id in idsToBeRemoved )
       {
         goalHandles.Remove( id );
       }
