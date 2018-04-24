@@ -34,7 +34,7 @@ namespace Uml.Robotics.Ros.ActionLib
     private DateTime nextStatusPublishTime;
     private long spinCallbackId = 0;
     private Timer timer;
-
+    private object lockGoalHandles;
 
     public ActionServer( NodeHandle nodeHandle, string actionName )
     {
@@ -42,6 +42,7 @@ namespace Uml.Robotics.Ros.ActionLib
       this.nodeHandle = new NodeHandle( nodeHandle, actionName );
       this.lastCancel = DateTime.UtcNow;
       this.started = false;
+      this.lockGoalHandles = new object();
     }
 
 
@@ -160,26 +161,31 @@ namespace Uml.Robotics.Ros.ActionLib
       var statusArray = new GoalStatusArray();
       statusArray.header = new Messages.std_msgs.Header();
       statusArray.header.stamp = ROS.GetTime( now );
+
       var goalStatuses = new List<GoalStatus>();
       
       var idsToBeRemoved = new List<string>();
-      foreach( var pair in goalHandles )
-      {
-        goalStatuses.Add( pair.Value.GoalStatus );
 
-        if( ( pair.Value.DestructionTime != null ) && ( pair.Value.DestructionTime + StatusListTimeout < now ) )
+      lock( lockGoalHandles )
+      {
+        foreach( var pair in goalHandles )
         {
-          ROS.Debug()( "actionlib", $"Removing server goal handle for goal id: {pair.Value.GoalId.id}" );
-          idsToBeRemoved.Add( pair.Value.GoalId.id );
+          goalStatuses.Add( pair.Value.GoalStatus );
+
+          if( ( pair.Value.DestructionTime != null ) && ( pair.Value.DestructionTime + StatusListTimeout < now ) )
+          {
+            ROS.Debug()( $"[actionlib] Removing server goal handle for goal id: {pair.Value.GoalId.id}" );
+            idsToBeRemoved.Add( pair.Value.GoalId.id );
+          }
         }
-      }
 
-      statusArray.status_list = goalStatuses.ToArray();
-      goalStatusPublisher.publish(statusArray);
+        statusArray.status_list = goalStatuses.ToArray();
+        goalStatusPublisher.publish( statusArray );
 
-      foreach ( string id in idsToBeRemoved )
-      {
-        goalHandles.Remove( id );
+        foreach( string id in idsToBeRemoved )
+        {
+          goalHandles.Remove( id );
+        }
       }
     }
 
@@ -227,7 +233,10 @@ namespace Uml.Robotics.Ros.ActionLib
           goalStatus.status = GoalStatus.RECALLING;
           goalHandle = new ServerGoalHandle<TGoal, TResult, TFeedback>( this, goalId, goalStatus, null );
           goalHandle.DestructionTime = ROS.GetTime( goalId.stamp );
-          goalHandles[goalId.id] = goalHandle;
+          lock( lockGoalHandles )
+          {
+            goalHandles[goalId.id] = goalHandle;
+          }
         }
 
       }
@@ -273,7 +282,10 @@ namespace Uml.Robotics.Ros.ActionLib
         var newGoalHandle = new ServerGoalHandle<TGoal, TResult, TFeedback>( this, goalId,
             goalStatus, goalAction.Goal
         );
-        goalHandles[goalId.id] = newGoalHandle;
+        lock( lockGoalHandles )
+        {
+          goalHandles[goalId.id] = newGoalHandle;
+        }
         goalCallback?.Invoke( newGoalHandle );
       }
     }
