@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Text;
 using Messages.std_msgs;
 using Uml.Robotics.Ros.ActionLib.Interfaces;
@@ -14,8 +15,7 @@ namespace Uml.Robotics.Ros.ActionLib
       where TFeedback : InnerActionMessage, new()
   {
     public int QueueSize { get; set; } = 50;
-    public TimeSpan StatusListTimeout { get; private set; } = new TimeSpan( 0, 0, 5 );
-    public double StatusFrequencySeconds { get; private set; } = 5;
+    public TimeSpan StatusListTimeout { get; private set; }
 
     private const string ACTIONLIB_STATUS_FREQUENCY = "actionlib_status_frequency";
     private const string STATUS_LIST_TIMEOUT = "status_list_timeout";
@@ -33,6 +33,7 @@ namespace Uml.Robotics.Ros.ActionLib
     private TimeSpan statusInterval;
     private DateTime nextStatusPublishTime;
     private long spinCallbackId = 0;
+    private Timer timer;
 
 
     public ActionServer( NodeHandle nodeHandle, string actionName )
@@ -95,34 +96,22 @@ namespace Uml.Robotics.Ros.ActionLib
       // Emmitting topics
       resultPublisher = nodeHandle.advertise<ResultActionMessage<TResult>>( "result", QueueSize );
       feedbackPublisher = nodeHandle.advertise<FeedbackActionMessage<TFeedback>>( "feedback", QueueSize );
-      goalStatusPublisher = nodeHandle.advertise<GoalStatusArray>( "status", QueueSize );
+      goalStatusPublisher = nodeHandle.advertise<GoalStatusArray>( "status", QueueSize, true );
 
       // Read the frequency with which to publish status from the parameter server
       // If not specified locally explicitly, use search param to find actionlib_status_frequency
       double statusFrequency;
-      bool success = Param.Get( ACTIONLIB_STATUS_FREQUENCY, out statusFrequency );
-      if( success )
-      {
-        StatusFrequencySeconds = statusFrequency;
-      }
+      Param.Get( ACTIONLIB_STATUS_FREQUENCY, out statusFrequency, 3.0 );
+
+      var splitFrequency = SplitSeconds( statusFrequency );
+      statusInterval = new TimeSpan( 0, 0, 0, splitFrequency.seconds, splitFrequency.milliseconds );
+      nextStatusPublishTime = DateTime.UtcNow + statusInterval;
+      timer = new Timer( SpinCallback, null, splitFrequency.seconds, splitFrequency.seconds );
 
       double statusListTimeout;
-      success = Param.Get( STATUS_LIST_TIMEOUT, out statusListTimeout );
-      if( success )
-      {
-        var split = SplitSeconds( statusListTimeout );
-        StatusListTimeout = new TimeSpan( 0, 0, split.seconds, split.milliseconds );
-      }
-
-      if( StatusFrequencySeconds > 0 )
-      {
-        var split = SplitSeconds( StatusFrequencySeconds );
-        statusInterval = new TimeSpan( 0, 0, split.seconds, split.milliseconds );
-        nextStatusPublishTime = DateTime.UtcNow + statusInterval;
-        var cb = new SpinCallbackImplementation( SpinCallback );
-        spinCallbackId = cb.Uid;
-        ROS.GlobalCallbackQueue.AddCallback( cb );
-      }
+      Param.Get( STATUS_LIST_TIMEOUT, out statusListTimeout, 5.0 );
+      var split = SplitSeconds( statusListTimeout );
+      StatusListTimeout = new TimeSpan( 0, 0, 0, split.seconds, split.milliseconds );
 
       // Message consumers
       goalSubscriber = nodeHandle.subscribe<GoalActionMessage<TGoal>>( "goal", this.QueueSize, GoalCallback );
