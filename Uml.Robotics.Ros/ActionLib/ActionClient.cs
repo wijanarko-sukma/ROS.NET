@@ -602,7 +602,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else if( goalStatus.status == GoalStatus.ACTIVE )
         {
-          TransitionToState( goalHandle, CommunicationState.ACTIVE );
+          // NOP
         }
         else if( goalStatus.status == GoalStatus.PREEMPTED )
         {
