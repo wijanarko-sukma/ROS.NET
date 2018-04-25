@@ -88,6 +88,11 @@ namespace Uml.Robotics.Ros
     {
     }
 
+    public string getService()
+    {
+      return service;
+    }
+
     public bool IsValid
     {
       get { return !persistent || ( !is_shutdown && server_link != null && server_link.IsValid ); }
