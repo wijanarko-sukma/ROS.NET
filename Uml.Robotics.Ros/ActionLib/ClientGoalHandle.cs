@@ -38,7 +38,7 @@ namespace Uml.Robotics.Ros.ActionLib
       {
         if( !Active )
         {
-          ROS.Error()( "actionlib", "Trying to getResult on an inactive ClientGoalHandle." );
+          ROS.Error()( $"[{ThisNode.Name}] [actionlib] Trying to getResult on an inactive ClientGoalHandle." );
         }
 
         if( LatestResultAction != null )
@@ -101,7 +101,7 @@ namespace Uml.Robotics.Ros.ActionLib
     {
       if( !Active )
       {
-        ROS.Error()( "actionlib", "Trying to cancel() on an inactive goal handle." );
+        ROS.Error()( $"[{ThisNode.Name}] [actionlib] Trying to cancel() on an inactive goal handle." );
       }
 
       if( ( State == CommunicationState.WAITING_FOR_RESULT ||
@@ -109,7 +109,7 @@ namespace Uml.Robotics.Ros.ActionLib
           State == CommunicationState.PREEMPTING ||
           State == CommunicationState.DONE ) )
       {
-        ROS.Debug()( "actionlib", $"Got a cancel() request while in state {State}, so ignoring it" );
+        ROS.Debug()( $"[{ThisNode.Name}] [actionlib] Got a cancel() request while in state {State}, so ignoring it" );
         return;
       }
       else if( !( State == CommunicationState.WAITING_FOR_GOAL_ACK ||
@@ -117,7 +117,7 @@ namespace Uml.Robotics.Ros.ActionLib
         State == CommunicationState.ACTIVE ||
         State == CommunicationState.WAITING_FOR_CANCEL_ACK ) )
       {
-        ROS.Debug()( "actionlib", $"BUG: Unhandled CommState: {State}" );
+        ROS.Debug()( $"[{ThisNode.Name}] [actionlib] BUG: Unhandled CommState: {State}" );
         return;
       }
 
@@ -135,7 +135,7 @@ namespace Uml.Robotics.Ros.ActionLib
       await Task.Delay( this.actionClient.PreemptTimeout ?? 3000 );
       if( this.State != CommunicationState.DONE )
       {
-        ROS.Warn()( "actionlib", $"Did not receive cancel acknowledgement for canceled goal id {this.Id}. Assuming that action server has been shutdown." );
+        ROS.Warn()( $"[{ThisNode.Name}] [actionlib] Did not receive cancel acknowledgement for canceled goal id {this.Id}. Assuming that action server has been shutdown." );
         this.actionClient.ProcessLost( this );
       }
     }
@@ -145,7 +145,7 @@ namespace Uml.Robotics.Ros.ActionLib
     {
       if( !Active )
       {
-        ROS.Error()( "actionlib", "Trying to resend() on an inactive goal handle." );
+        ROS.Error()( $"[{ThisNode.Name}] [actionlib] Trying to resend() on an inactive goal handle." );
       }
       actionClient.GoalPublisher.publish( Goal );
     }

@@ -274,7 +274,7 @@ namespace Uml.Robotics.Ros.ActionLib
 
     public void TransitionToState( ClientGoalHandle<TGoal, TResult, TFeedback> goalHandle, CommunicationState nextState )
     {
-      ROS.Debug()( $"Transitioning CommState from {goalHandle.State} to {nextState}" );
+      ROS.Debug()( $"[{ThisNode.Name}] Transitioning CommState from {goalHandle.State} to {nextState}" );
       goalHandle.FireTransitionCallback( nextState );
     }
 
@@ -283,37 +283,37 @@ namespace Uml.Robotics.Ros.ActionLib
     {
       if( !statusReceived )
       {
-        ROS.Debug()( "isServerConnected: Didn't receive status yet, so not connected yet" );
+        //ROS.Debug()( $"[{ThisNode.Name}] isServerConnected: Didn't receive status yet, so not connected yet" );
         return false;
       }
 
       if( !goalSubscriberCount.ContainsKey( statusCallerId ) )
       {
-        ROS.Debug()( $"isServerConnected: Server {statusCallerId} has not yet subscribed to the goal topic, so not connected yet" );
-        ROS.Debug()( FormatSubscriberDebugString( "goalSubscribers", goalSubscriberCount ) );
+        //ROS.Debug()( $"[{ThisNode.Name}] isServerConnected: Server {statusCallerId} has not yet subscribed to the goal topic, so not connected yet" );
+        //ROS.Debug()( FormatSubscriberDebugString( "goalSubscribers", goalSubscriberCount ) );
         return false;
       }
 
       if( !cancelSubscriberCount.ContainsKey( statusCallerId ) )
       {
-        ROS.Debug()( $"isServerConnected: Server {statusCallerId} has not yet subscribed to the cancel topic, so not connected yet" );
-        ROS.Debug()( FormatSubscriberDebugString( "goalSubscribers", cancelSubscriberCount ) );
+        //ROS.Debug()( $"[{ThisNode.Name}] isServerConnected: Server {statusCallerId} has not yet subscribed to the cancel topic, so not connected yet" );
+        //ROS.Debug()( FormatSubscriberDebugString( "goalSubscribers", cancelSubscriberCount ) );
         return false;
       }
 
       if( feedbackSubscriber.NumPublishers == 0 )
       {
-        ROS.Debug()( $"isServerConnected: Client has not yet connected to feedback topic of server {statusCallerId}" );
+        //ROS.Debug()( $"[{ThisNode.Name}] isServerConnected: Client has not yet connected to feedback topic of server {statusCallerId}" );
         return false;
       }
 
       if( resultSubscriber.NumPublishers == 0 )
       {
-        ROS.Debug()( $"isServerConnected: Client has not yet connected to feedback topic of server {statusCallerId}" );
+        //ROS.Debug()( $"[{ThisNode.Name}] isServerConnected: Client has not yet connected to feedback topic of server {statusCallerId}" );
         return false;
       }
 
-      ROS.Debug()( $"isServerConnected: Server {statusCallerId} is fully connected." );
+      //ROS.Debug()( $"[{ThisNode.Name}] isServerConnected: Server {statusCallerId} is fully connected." );
       return true;
     }
 
@@ -369,11 +369,11 @@ namespace Uml.Robotics.Ros.ActionLib
       if( !subscriberExists )
       {
         // This should never happen. Warning has been copied from official actionlib implementation
-        ROS.Warn()( $"goalDisconnectCallback: Trying to remove {publisher.SubscriberName} from goalSubscribers, but it is not in the goalSubscribers list." );
+        ROS.Warn()( $"[{ThisNode.Name}] goalDisconnectCallback: Trying to remove {publisher.SubscriberName} from goalSubscribers, but it is not in the goalSubscribers list." );
       }
       else
       {
-        ROS.Debug()( $"goalDisconnectCallback: Removing {publisher.SubscriberName} from goalSubscribers, (remaining with same name: {subscriberCount - 1})" );
+        ROS.Debug()( $"[{ThisNode.Name}] goalDisconnectCallback: Removing {publisher.SubscriberName} from goalSubscribers, (remaining with same name: {subscriberCount - 1})" );
         if( subscriberCount <= 1 )
         {
           cancelSubscriberCount.Remove( publisher.SubscriberName );
@@ -406,7 +406,7 @@ namespace Uml.Robotics.Ros.ActionLib
       int subscriberCount = 0;
       bool keyExists = goalSubscriberCount.TryGetValue( publisher.SubscriberName, out subscriberCount );
       goalSubscriberCount[publisher.SubscriberName] = ( keyExists ? subscriberCount : 0 ) + 1;
-      ROS.Debug()( $"goalConnectCallback: Adding {publisher.SubscriberName} to goalSubscribers" );
+      ROS.Debug()( $"[{ThisNode.Name}] goalConnectCallback: Adding {publisher.SubscriberName} to goalSubscribers" );
     }
 
 
@@ -417,11 +417,11 @@ namespace Uml.Robotics.Ros.ActionLib
       if( !keyExists )
       {
         // This should never happen. Warning has been copied from official actionlib implementation
-        ROS.Warn()( $"goalDisconnectCallback: Trying to remove {publisher.SubscriberName} from goalSubscribers, but it is not in the goalSubscribers list." );
+        ROS.Warn()( $"[{ThisNode.Name}] goalDisconnectCallback: Trying to remove {publisher.SubscriberName} from goalSubscribers, but it is not in the goalSubscribers list." );
       }
       else
       {
-        ROS.Debug()( $"goalDisconnectCallback: Removing {publisher.SubscriberName} from goalSubscribers, (remaining with same name: {subscriberCount - 1})" );
+        ROS.Debug()( $"[{ThisNode.Name}] goalDisconnectCallback: Removing {publisher.SubscriberName} from goalSubscribers, (remaining with same name: {subscriberCount - 1})" );
         if( subscriberCount <= 1 )
         {
           goalSubscriberCount.Remove( publisher.SubscriberName );
@@ -449,7 +449,7 @@ namespace Uml.Robotics.Ros.ActionLib
 
         if( goalHandle.State == CommunicationState.DONE )
         {
-          ROS.Error()( $"Got a result when we were already in the DONE state (goal_id: {result.GoalStatus.goal_id.id})" );
+          ROS.Error()( $"[{ThisNode.Name}] Got a result when we were already in the DONE state (goal_id: {result.GoalStatus.goal_id.id})" );
         }
         else if( ( goalHandle.State == CommunicationState.WAITING_FOR_GOAL_ACK ) ||
             ( goalHandle.State == CommunicationState.WAITING_FOR_GOAL_ACK ) ||
@@ -465,7 +465,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Error()( $"Invalid comm for result message state: {goalHandle.State}." );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid comm for result message state: {goalHandle.State}." );
         }
       }
     }
@@ -478,26 +478,26 @@ namespace Uml.Robotics.Ros.ActionLib
       bool callerIdPresent = statusArray.connection_header.TryGetValue( "callerid", out callerId );
       if( callerIdPresent )
       {
-        ROS.Debug()( $"Getting status over the wire (callerid: {callerId}; count: {statusArray.status_list.Length})." );
+        ROS.Debug()( $"[{ThisNode.Name}] Getting status over the wire (callerid: {callerId}; count: {statusArray.status_list.Length})." );
 
         if( statusReceived )
         {
           if( statusCallerId != callerId )
           {
-            ROS.Warn()( $"onStatusMessage: Previously received status from {statusCallerId}, but we now received status from {callerId}. Did the ActionServer change?" );
+            ROS.Warn()( $"[{ThisNode.Name}] onStatusMessage: Previously received status from {statusCallerId}, but we now received status from {callerId}. Did the ActionServer change?" );
             statusCallerId = callerId;
           }
         }
         else
         {
-          ROS.Debug()( $"onStatusMessage: Just got our first status message from the ActionServer at node {callerId}" );
+          ROS.Debug()( $"[{ThisNode.Name}] onStatusMessage: Just got our first status message from the ActionServer at node {callerId}" );
           statusReceived = true;
           statusCallerId = callerId;
         }
         LatestStatusTime = timestamp;
         if( LatestSequenceNumber != null && statusArray.header.seq <= LatestSequenceNumber )
         {
-          ROS.Warn()( "Status sequence number was decreased. This can only happen when the action server was restarted. Assume all active goals are lost." );
+          ROS.Warn()( "[{ThisNode.Name}] Status sequence number was decreased. This can only happen when the action server was restarted. Assume all active goals are lost." );
           handleConnectionLost();
         }
         LatestSequenceNumber = statusArray.header.seq;
@@ -528,7 +528,7 @@ namespace Uml.Robotics.Ros.ActionLib
         // Remove goal handles that are done from the tracking list
         foreach( var goalHandleId in completedGoals )
         {
-          ROS.Info()( $"Remove goal handle id {goalHandleId} from tracked goal handles" );
+          ROS.Info()( $"[{ThisNode.Name}] Remove goal handle id {goalHandleId} from tracked goal handles" );
           lock( lockGoalHandles )
           {
             goalHandles.Remove( goalHandleId );
@@ -538,14 +538,14 @@ namespace Uml.Robotics.Ros.ActionLib
       }
       else
       {
-        ROS.Error()( "Received StatusMessage with no caller ID" );
+        ROS.Error()( $"[{ThisNode.Name}] Received StatusMessage with no caller ID" );
       }
     }
 
 
     public void ProcessLost( ClientGoalHandle<TGoal, TResult, TFeedback> goalHandle )
     {
-      ROS.Warn()( "Transitioning goal to LOST" );
+      ROS.Warn()( $"[{ThisNode.Name}] Transitioning goal to LOST" );
       if( goalHandle.LatestGoalStatus != null )
       {
         goalHandle.LatestGoalStatus.status = GoalStatus.LOST;
@@ -562,7 +562,7 @@ namespace Uml.Robotics.Ros.ActionLib
     )
     {
       if( !await this.WaitForActionServerToStartAsync( TimeSpan.FromSeconds( 3 ) ) )
-        throw new TimeoutException( $"Action server {this.Name} is not available." );
+        throw new TimeoutException( $"[{ThisNode.Name}] Action server {this.Name} is not available." );
 
       var gh = this.SendGoal( goal, onTransistionCallback, onFeedbackCallback );
       using( cancel.Register( gh.Cancel ) )
@@ -590,7 +590,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Debug()( $"goal status is null for {goalHandle.Id}, most propably because it was just send and there and the server has not yet sent an update" );
+          ROS.Debug()( $"[{ThisNode.Name}] goal status is null for {goalHandle.Id}, most propably because it was just send and there and the server has not yet sent an update" );
           return;
         }
       }
@@ -645,7 +645,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Error()( "BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
+          ROS.Error()( $"[{ThisNode.Name}] BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
         }
       }
       else if( goalHandle.State == CommunicationState.PENDING )
@@ -694,7 +694,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Error()( "BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
+          ROS.Error()( $"[{ThisNode.Name}] BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
         }
 
 
@@ -704,7 +704,7 @@ namespace Uml.Robotics.Ros.ActionLib
 
         if( goalStatus.status == GoalStatus.PENDING )
         {
-          ROS.Error()( "Invalid transition from ACTIVE to PENDING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid transition from ACTIVE to PENDING" );
         }
         else if( goalStatus.status == GoalStatus.ACTIVE )
         {
@@ -712,15 +712,15 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else if( goalStatus.status == GoalStatus.REJECTED )
         {
-          ROS.Error()( "Invalid transition from ACTIVE to REJECTED" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid transition from ACTIVE to REJECTED" );
         }
         else if( goalStatus.status == GoalStatus.RECALLING )
         {
-          ROS.Error()( "Invalid transition from ACTIVE to RECALLING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid transition from ACTIVE to RECALLING" );
         }
         else if( goalStatus.status == GoalStatus.RECALLED )
         {
-          ROS.Error()( "Invalid transition from ACTIVE to RECALLED" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid transition from ACTIVE to RECALLED" );
         }
         else if( goalStatus.status == GoalStatus.PREEMPTED )
         {
@@ -738,7 +738,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Error()( "BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
+          ROS.Error()( $"[{ThisNode.Name}] BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
         }
 
 
@@ -748,15 +748,15 @@ namespace Uml.Robotics.Ros.ActionLib
 
         if( goalStatus.status == GoalStatus.PENDING )
         {
-          ROS.Error()( "Invalid Transition from WAITING_FOR_RESUT to PENDING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from WAITING_FOR_RESUT to PENDING" );
         }
         else if( goalStatus.status == GoalStatus.PREEMPTING )
         {
-          ROS.Error()( "Invalid transition from WAITING_FOR_RESUT to PREEMPTING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid transition from WAITING_FOR_RESUT to PREEMPTING" );
         }
         else if( goalStatus.status == GoalStatus.RECALLING )
         {
-          ROS.Error()( "Invalid transition from WAITING_FOR_RESUT to RECALLING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid transition from WAITING_FOR_RESUT to RECALLING" );
         }
         else if( goalStatus.status == GoalStatus.ACTIVE ||
           goalStatus.status == GoalStatus.PREEMPTED ||
@@ -769,7 +769,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Error()( "BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
+          ROS.Error()( $"[{ThisNode.Name}] BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
         }
 
 
@@ -812,7 +812,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Error()( "BUG: Got an unknown State from the ActionServer. status = %u", goalStatus.status );
+          ROS.Error()( $"[{ThisNode.Name}] BUG: Got an unknown State from the ActionServer. status = %u", goalStatus.status );
         }
 
       }
@@ -821,11 +821,11 @@ namespace Uml.Robotics.Ros.ActionLib
 
         if( goalStatus.status == GoalStatus.PENDING )
         {
-          ROS.Error()( "Invalid Transition from RECALLING to PENDING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from RECALLING to PENDING" );
         }
         else if( goalStatus.status == GoalStatus.ACTIVE )
         {
-          ROS.Error()( "Invalid Transition from RECALLING to ACTIVE" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from RECALLING to ACTIVE" );
         }
         else if(
             goalStatus.status == GoalStatus.SUCCEEDED ||
@@ -854,7 +854,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Error()( "BUG: Got an unknown State from the ActionServer. status = %u", goalStatus.status );
+          ROS.Error()( $"[{ThisNode.Name}] BUG: Got an unknown State from the ActionServer. status = %u", goalStatus.status );
         }
 
       }
@@ -863,23 +863,23 @@ namespace Uml.Robotics.Ros.ActionLib
 
         if( goalStatus.status == GoalStatus.PENDING )
         {
-          ROS.Error()( "Invalid Transition from PREEMPTING to PENDING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from PREEMPTING to PENDING" );
         }
         else if( goalStatus.status == GoalStatus.ACTIVE )
         {
-          ROS.Error()( "Invalid Transition from PREEMPTING to ACTIVE" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from PREEMPTING to ACTIVE" );
         }
         else if( goalStatus.status == GoalStatus.REJECTED )
         {
-          ROS.Error()( "Invalid Transition from PREEMPTING to REJECTED" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from PREEMPTING to REJECTED" );
         }
         else if( goalStatus.status == GoalStatus.RECALLING )
         {
-          ROS.Error()( "Invalid Transition from PREEMPTING to RECALLING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from PREEMPTING to RECALLING" );
         }
         else if( goalStatus.status == GoalStatus.RECALLED )
         {
-          ROS.Error()( "Invalid Transition from PREEMPTING to RECALLED" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from PREEMPTING to RECALLED" );
         }
         else if(
             goalStatus.status == GoalStatus.PREEMPTED ||
@@ -895,7 +895,7 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Error()( "BUG: Got an unknown State from the ActionServer. status = %u", goalStatus.status );
+          ROS.Error()( $"[{ThisNode.Name}] BUG: Got an unknown State from the ActionServer. status = %u", goalStatus.status );
         }
 
       }
@@ -904,19 +904,19 @@ namespace Uml.Robotics.Ros.ActionLib
 
         if( goalStatus.status == GoalStatus.PENDING )
         {
-          ROS.Error()( "Invalid Transition from DONE to PENDING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from DONE to PENDING" );
         }
         else if( goalStatus.status == GoalStatus.ACTIVE )
         {
-          ROS.Error()( "Invalid Transition from DONE to ACTIVE" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from DONE to ACTIVE" );
         }
         else if( goalStatus.status == GoalStatus.RECALLING )
         {
-          ROS.Error()( "Invalid Transition from DONE to RECALLING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from DONE to RECALLING" );
         }
         else if( goalStatus.status == GoalStatus.PREEMPTING )
         {
-          ROS.Error()( "Invalid Transition from DONE to PREEMPTING" );
+          ROS.Error()( $"[{ThisNode.Name}] Invalid Transition from DONE to PREEMPTING" );
         }
         else if(
             goalStatus.status == GoalStatus.PREEMPTED ||
@@ -930,13 +930,13 @@ namespace Uml.Robotics.Ros.ActionLib
         }
         else
         {
-          ROS.Error()( "BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
+          ROS.Error()( $"[{ThisNode.Name}] BUG: Got an unknown status from the ActionServer. status = %u", goalStatus.status );
         }
 
       }
       else
       {
-        ROS.Error()( "Invalid comm State: %u", goalHandle.State );
+        ROS.Error()( $"[{ThisNode.Name}] Invalid comm State: %u", goalHandle.State );
       }
 
     }

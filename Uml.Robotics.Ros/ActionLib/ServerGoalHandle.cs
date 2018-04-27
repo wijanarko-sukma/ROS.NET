@@ -60,15 +60,14 @@ namespace Uml.Robotics.Ros.ActionLib
     public void SetAborted( TResult result, string text )
     {
       text = text ?? "";
-      ROS.Debug()( "actionlib", $"Setting status to aborted on goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
+      ROS.Debug()( $"[{ThisNode.Name}] [actionlib] Setting status to aborted on goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
       if( ( GoalStatus.status == GoalStatus.PREEMPTING ) || ( GoalStatus.status == GoalStatus.ACTIVE ) )
       {
         SetGoalResult( GoalStatus.ABORTED, text, result );
       }
       else
       {
-        ROS.Error()( "actionlib", "To transition to an aborted state, the goal must be in a preempting or active state, " +
-            $"it is currently in state: {GoalStatus.status}" );
+        ROS.Error()( $"[{ThisNode.Name}] [actionlib] To transition to an aborted state, the goal must be in a preempting or active state, it is currently in state: {GoalStatus.status}" );
       }
     }
 
@@ -76,7 +75,7 @@ namespace Uml.Robotics.Ros.ActionLib
     public void SetAccepted( string text )
     {
       text = text ?? "";
-      ROS.Debug()( "actionlib", $"Accepting goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
+      ROS.Debug()( $"[{ThisNode.Name}] [actionlib] Accepting goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
       if( GoalStatus.status == GoalStatus.PENDING )
       {
         SetGoalStatus( GoalStatus.ACTIVE, text );
@@ -87,8 +86,7 @@ namespace Uml.Robotics.Ros.ActionLib
       }
       else
       {
-        ROS.Error()( "actionlib", "To transition to an active state, the goal must be in a pending or recalling state, " +
-            $"it is currently in state: {GoalStatus.status}" );
+        ROS.Error()( $"[{ThisNode.Name}] [actionlib] To transition to an active state, the goal must be in a pending or recalling state, it is currently in state: {GoalStatus.status}" );
       }
     }
 
@@ -107,15 +105,14 @@ namespace Uml.Robotics.Ros.ActionLib
       }
       else
       {
-        ROS.Error()( "actionlib", "To transition to a cancelled state, the goal must be in a pending, recalling, active, " +
-            $"or preempting state, it is currently in state: {GoalStatus.status}" );
+        ROS.Error()( $"[{ThisNode.Name}] [actionlib] To transition to a cancelled state, the goal must be in a pending, recalling, active, or preempting state, it is currently in state: {GoalStatus.status}" );
       }
     }
 
 
     public bool SetCancelRequested()
     {
-      ROS.Debug()( "actionlib", $"Transisitoning to a cancel requested state on goal id: {GoalId.id}, stamp: {GoalId.stamp}" );
+      ROS.Debug()( $"[{ThisNode.Name}] [actionlib] Transisitoning to a cancel requested state on goal id: {GoalId.id}, stamp: {GoalId.stamp}" );
       bool result = false;
       if( GoalStatus.status == GoalStatus.PENDING )
       {
@@ -152,15 +149,14 @@ namespace Uml.Robotics.Ros.ActionLib
     public void SetRejected( TResult result, string text )
     {
       text = text ?? "";
-      ROS.Debug()( "actionlib", $"Setting status to rejected on goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
+      ROS.Debug()( $"[{ThisNode.Name}] [actionlib] Setting status to rejected on goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
       if( ( GoalStatus.status == GoalStatus.PENDING ) || ( GoalStatus.status == GoalStatus.RECALLING ) )
       {
         SetGoalResult( GoalStatus.REJECTED, text, result );
       }
       else
       {
-        ROS.Error()( "actionlib", "To transition to a rejected state, the goal must be in a pending or recalling state, " +
-            $"it is currently in state: {GoalStatus.status}" );
+        ROS.Error()( $"[{ThisNode.Name}] [actionlib] To transition to a rejected state, the goal must be in a pending or recalling state, it is currently in state: {GoalStatus.status}" );
       }
     }
 
@@ -168,15 +164,14 @@ namespace Uml.Robotics.Ros.ActionLib
     public void SetSucceded( TResult result, string text )
     {
       text = text ?? "";
-      ROS.Debug()( "actionlib", $"Setting status to succeeded on goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
+      ROS.Debug()( $"[{ThisNode.Name}] [actionlib] Setting status to succeeded on goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
       if( ( GoalStatus.status == GoalStatus.PREEMPTING ) || ( GoalStatus.status == GoalStatus.ACTIVE ) )
       {
         SetGoalResult( GoalStatus.SUCCEEDED, text, result );
       }
       else
       {
-        ROS.Error()( "actionlib", "To transition to a succeeded state, the goal must be in a preempting or active state, " +
-            $"it is currently in state: {GoalStatus.status}" );
+        ROS.Error()( $"[{ThisNode.Name}] [actionlib] To transition to a succeeded state, the goal must be in a preempting or active state, it is currently in state: {GoalStatus.status}" );
       }
     }
 

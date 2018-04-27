@@ -130,7 +130,7 @@ namespace Uml.Robotics.Ros.ActionLib
       newFeedback.Header.stamp = ROS.GetTime();
       newFeedback.GoalStatus = goalStatus;
       newFeedback.Feedback = feedback;
-      ROS.Debug()( $"[actionlib] Publishing feedback for goal with id: {goalStatus.goal_id.id} and stamp: {new DateTimeOffset( ROS.GetTime( goalStatus.goal_id.stamp ) ).ToUnixTimeSeconds()}" );
+      ROS.Debug()( $"[{ThisNode.Name}] [actionlib] Publishing feedback for goal with id: {goalStatus.goal_id.id} and stamp: {new DateTimeOffset( ROS.GetTime( goalStatus.goal_id.stamp ) ).ToUnixTimeSeconds()}" );
       feedbackPublisher.publish( newFeedback );
     }
 
@@ -145,7 +145,7 @@ namespace Uml.Robotics.Ros.ActionLib
       {
         newResult.Result = result;
       }
-      ROS.Debug()( $"[actionlib] Publishing result for goal with id: {goalStatus.goal_id.id} and stamp: {new DateTimeOffset( ROS.GetTime( goalStatus.goal_id.stamp ) ).ToUnixTimeSeconds()}" );
+      ROS.Debug()( $"[{ThisNode.Name}] [actionlib] Publishing result for goal with id: {goalStatus.goal_id.id} and stamp: {new DateTimeOffset( ROS.GetTime( goalStatus.goal_id.stamp ) ).ToUnixTimeSeconds()}" );
       resultPublisher.publish( newResult );
       PublishStatus();
     }
@@ -170,7 +170,7 @@ namespace Uml.Robotics.Ros.ActionLib
 
           if( ( pair.Value.DestructionTime != null ) && ( pair.Value.DestructionTime + StatusListTimeout < now ) )
           {
-            ROS.Debug()( $"[actionlib] Removing server goal handle for goal id: {pair.Value.GoalId.id}" );
+            ROS.Debug()( $"[{ThisNode.Name}] [actionlib] Removing server goal handle for goal id: {pair.Value.GoalId.id}" );
             idsToBeRemoved.Add( pair.Value.GoalId.id );
           }
         }
@@ -193,7 +193,7 @@ namespace Uml.Robotics.Ros.ActionLib
         return;
       }
 
-      ROS.Debug()( $"[actionlib] The action server has received a new cancel request" );
+      ROS.Debug()( $"[{ThisNode.Name}] [actionlib] The action server has received a new cancel request" );
 
       if( goalId.id == null )
       {
@@ -254,7 +254,7 @@ namespace Uml.Robotics.Ros.ActionLib
 
       GoalID goalId = goalAction.GoalId;
 
-      ROS.Debug()( $"[actionlib] The action server has received a new goal request" );
+      ROS.Debug()( $"[{ThisNode.Name}] [actionlib] The action server has received a new goal request" );
       ServerGoalHandle<TGoal, TResult, TFeedback> observedGoalHandle = null;
       if( goalHandles.ContainsKey( goalId.id ) )
       {
