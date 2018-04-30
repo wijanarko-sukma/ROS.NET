@@ -236,7 +236,7 @@ namespace Uml.Robotics.Ros
           //ROS.Debug()("NEGOTIATINGING");
         }
         else
-          ROS.Info()( "Skipping myself (" + name + ", " + XmlRpcManager.Instance.Uri + ")" );
+          ROS.Info()( $"Skipping myself ({name}, {XmlRpcManager.Instance.Uri})" );
       }
       return retval;
     }
@@ -252,7 +252,7 @@ namespace Uml.Robotics.Ros
       Params.Set( 2, protos_array );
       if( !Network.SplitUri( xmlRpcUri, out string peerHost, out int peerPort ) )
       {
-        ROS.Error()( "Bad xml-rpc URI: [" + xmlRpcUri + "]" );
+        ROS.Error()( $"Bad xml-rpc URI: [{xmlRpcUri}]" );
         return false;
       }
 
@@ -260,13 +260,12 @@ namespace Uml.Robotics.Ros
       var requestTopicTask = client.ExecuteAsync( "requestTopic", Params );
       if( requestTopicTask.IsFaulted )
       {
-        ROS.Error()( "Failed to contact publisher [" + peerHost + ":" + peerPort + "] for topic [" + name + "]" );
+        ROS.Error()( $"Failed to contact publisher [{peerHost}:{peerPort}for topic [{name}]" );
         return false;
 
       }
 
-      ROS.Debug()( "Began asynchronous xmlrpc connection to http://" + peerHost + ":" + peerPort +
-                      "/ for topic [" + name + "]" );
+      ROS.Debug()( $"Began asynchronous xmlrpc connection to http://{peerHost}:{peerPort}/ for topic [{name}]" );
 
       var conn = new PendingConnection( client, requestTopicTask, xmlRpcUri );
       lock( pendingConnections )
@@ -278,6 +277,19 @@ namespace Uml.Robotics.Ros
       return true;
     }
 
+    private string BuildExceptionMessages( Exception ex )
+    {
+      System.Net.Sockets.SocketException socketEx = (System.Net.Sockets.SocketException)ex;
+      string message = ( socketEx != null )? socketEx.Message + " + Native Error Code: " + socketEx.NativeErrorCode + " + Socket Error Code: " + socketEx.SocketErrorCode : ex.Message;
+
+      if( ex.InnerException != null )
+      {
+        message += " - " + BuildExceptionMessages( ex.InnerException );
+      }
+
+      return message;
+    }
+
     private void PendingConnectionDone( PendingConnection conn, Task<XmlRpcCallResult> callTask )
     {
       lock( pendingConnections )
@@ -287,7 +299,14 @@ namespace Uml.Robotics.Ros
 
       if( callTask.IsFaulted )
       {
-        ROS.Warn()( $"Negotiating for {name} has failed (Error: {callTask.Exception.Message})." );
+        List<string> errorMessages = new List<string>();
+
+        foreach( Exception exception in callTask.Exception.InnerExceptions )
+        {
+          errorMessages.Add( BuildExceptionMessages( exception ) );
+        }
+
+        ROS.Warn()( $"Negotiating for {name} has failed (Error: {string.Join( ", ", errorMessages.ToArray() )})." );
         return;
       }
 
