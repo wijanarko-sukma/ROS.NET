@@ -279,8 +279,16 @@ namespace Uml.Robotics.Ros
 
     private string BuildExceptionMessages( Exception ex )
     {
-      System.Net.Sockets.SocketException socketEx = (System.Net.Sockets.SocketException)ex;
-      string message = ( socketEx != null )? socketEx.Message + " + Native Error Code: " + socketEx.NativeErrorCode + " + Socket Error Code: " + socketEx.SocketErrorCode : ex.Message;
+      string message = "";
+      if( ex is System.Net.Sockets.SocketException )
+      {
+        System.Net.Sockets.SocketException socketEx = (System.Net.Sockets.SocketException)ex;
+        message = socketEx.Message + " + Native Error Code: " + socketEx.NativeErrorCode + " + Socket Error Code: " + socketEx.SocketErrorCode;
+      }
+      else
+      {
+        message = ex.Message;
+      }
 
       if( ex.InnerException != null )
       {
