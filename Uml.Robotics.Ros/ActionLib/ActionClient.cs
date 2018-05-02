@@ -234,7 +234,7 @@ namespace Uml.Robotics.Ros.ActionLib
             return false;
         }
 
-        await Task.Delay( 1 );
+        await Task.Delay( 10 );
       }
 
       return false;
