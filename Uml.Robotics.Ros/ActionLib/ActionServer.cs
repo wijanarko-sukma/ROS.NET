@@ -103,10 +103,7 @@ namespace Uml.Robotics.Ros.ActionLib
       // If not specified locally explicitly, use search param to find actionlib_status_frequency
       double statusFrequency;
       Param.Get( ACTIONLIB_STATUS_FREQUENCY, out statusFrequency, 3.0 );
-
-      var splitFrequency = SplitSeconds( statusFrequency );
-
-      timer = new Timer( SpinCallback, null, 0, splitFrequency.milliseconds );
+      timer = new Timer( SpinCallback, null, 0, (int)statusFrequency * 1000 );
       
       double statusListTimeout;
       Param.Get( STATUS_LIST_TIMEOUT, out statusListTimeout, 5.0 );
