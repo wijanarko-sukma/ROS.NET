@@ -105,10 +105,9 @@ namespace Uml.Robotics.Ros.ActionLib
       Param.Get( ACTIONLIB_STATUS_FREQUENCY, out statusFrequency, 3.0 );
 
       var splitFrequency = SplitSeconds( statusFrequency );
-      statusInterval = new TimeSpan( 0, 0, 0, splitFrequency.seconds, splitFrequency.milliseconds );
-      nextStatusPublishTime = DateTime.UtcNow + statusInterval;
-      timer = new Timer( SpinCallback, null, splitFrequency.seconds, splitFrequency.seconds );
 
+      timer = new Timer( SpinCallback, null, 0, splitFrequency.milliseconds );
+      
       double statusListTimeout;
       Param.Get( STATUS_LIST_TIMEOUT, out statusListTimeout, 5.0 );
       var split = SplitSeconds( statusListTimeout );
