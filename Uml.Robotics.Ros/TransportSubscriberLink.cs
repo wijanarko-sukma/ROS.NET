@@ -65,6 +65,7 @@ namespace Uml.Robotics.Ros
       destination_caller_id = client_callerid;
       connection_id = ConnectionManager.Instance.GetNewConnectionId();
       name = pt.Name;
+      topic = name;
       parent = pt;
       lock( parent )
       {
