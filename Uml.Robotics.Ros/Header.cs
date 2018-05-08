@@ -32,7 +32,7 @@ namespace Uml.Robotics.Ros
 
       if( i != size )
       {
-        ROS.Warn()( "Could not parse connection header." );
+        ROS.Warn()( $"[{ThisNode.Name}] Could not parse connection header." );
         return false;
       }
 

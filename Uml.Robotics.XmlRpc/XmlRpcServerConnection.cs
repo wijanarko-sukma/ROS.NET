@@ -29,7 +29,7 @@ namespace Uml.Robotics.XmlRpc
     // The server delegates handling client requests to a serverConnection object.
     public XmlRpcServerConnection( Socket fd, XmlRpcServer server )
     {
-      Console.WriteLine( "XmlRpcServerConnection: new socket {0}.", fd.RemoteEndPoint.ToString() );
+      //Console.WriteLine( "XmlRpcServerConnection: new socket {0}.", fd.RemoteEndPoint.ToString() );
       this.server = server;
       socket = fd;
       stream = new NetworkStream( socket, true );
@@ -93,7 +93,7 @@ namespace Uml.Robotics.XmlRpc
 
     public override void Close()
     {
-      Console.WriteLine( "XmlRpcServerConnection is closing" );
+      //Console.WriteLine( "XmlRpcServerConnection is closing" );
       if( socket != null )
       {
         //socket.Close(100);    // ## AKo: Will be part of .net core 1.2, see https://github.com/dotnet/corefx/issues/12060
@@ -116,19 +116,19 @@ namespace Uml.Robotics.XmlRpc
           dataLen = stream.Read( data, 0, left );
           if( dataLen == 0 )
           {
-            Console.WriteLine( "XmlRpcServerConnection::readRequest: Stream was closed" );
+            //Console.WriteLine( "XmlRpcServerConnection::readRequest: Stream was closed" );
             return false;
           }
         }
         catch( Exception ex )
         {
-          Console.WriteLine( "XmlRpcServerConnection::readRequest: error while reading the rest of data ({0}).", ex.Message );
+          //Console.WriteLine( "XmlRpcServerConnection::readRequest: error while reading the rest of data ({0}).", ex.Message );
           return false;
         }
         header.Append( Encoding.ASCII.GetString( data, 0, dataLen ) );
       }
       // Otherwise, parse and dispatch the request
-      Debug.WriteLine( "XmlRpcServerConnection::readRequest read {0} bytes.", dataLen );
+      //Debug.WriteLine( "XmlRpcServerConnection::readRequest read {0} bytes.", dataLen );
 
       if( !header.ContentComplete )
       {
@@ -144,7 +144,7 @@ namespace Uml.Robotics.XmlRpc
       string response = server.executeRequest( request );
       if( response.Length == 0 )
       {
-        Console.WriteLine( "XmlRpcServerConnection::writeResponse: empty response." );
+        //Console.WriteLine( "XmlRpcServerConnection::writeResponse: empty response." );
         return false;
       }
       try
@@ -163,16 +163,16 @@ namespace Uml.Robotics.XmlRpc
         }
         catch( Exception ex )
         {
-          Console.WriteLine( string.Format( "Exception while writing response: {0}", ex.Message ) );
+          //Console.WriteLine( string.Format( "Exception while writing response: {0}", ex.Message ) );
         }
       }
       catch( Exception ex )
       {
-        Console.WriteLine( "XmlRpcServerConnection::writeResponse: write error ({0}).", ex.Message );
+        //Console.WriteLine( "XmlRpcServerConnection::writeResponse: write error ({0}).", ex.Message );
         return false;
       }
 
-      Debug.WriteLine( "XmlRpcServerConnection::writeResponse: wrote {0} of {0} bytes.", _bytesWritten, response.Length );
+      //Debug.WriteLine( "XmlRpcServerConnection::writeResponse: wrote {0} of {0} bytes.", _bytesWritten, response.Length );
 
       // Prepare to read the next request
       if( _bytesWritten == response.Length )

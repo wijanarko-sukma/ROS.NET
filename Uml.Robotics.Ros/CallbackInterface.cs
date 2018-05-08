@@ -145,7 +145,7 @@ namespace Uml.Robotics.Ros
       }
       else
       {
-        ROS.Error()( $"{nameof( Event )} is null" );
+        ROS.Error()( $"[{ThisNode.Name}] {nameof( Event )} is null" );
       }
     }
 

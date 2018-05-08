@@ -157,7 +157,7 @@ namespace Uml.Robotics.Ros
 
     private bool ValidateFailed( string method, string errorFormat, params object[] args )
     {
-      ROS.Debug()( "XML-RPC Call [{0}] {1} failed validation", method, string.Format( errorFormat, args ) );
+      ROS.Debug()( $"[{ThisNode.Name}] XML-RPC Call [{0}] {1} failed validation", method, string.Format( errorFormat, args ) );
       return false;
     }
 
@@ -207,7 +207,7 @@ namespace Uml.Robotics.Ros
       if( port == 0 )
       {
         this.port = server.Port;     // get bind result
-        this.uri = "http://" + Network.host + ":" + this.port + "/";
+        this.uri = $"http://{Network.host}:{this.port}/";
       }
       else
       {
@@ -215,7 +215,7 @@ namespace Uml.Robotics.Ros
         this.uri = ROS.ROS_MASTER_URI;       // if port is not 0 we are be the master
       }
 
-      ROS.Info()( "XmlRpc Server listening at " + uri );
+      //ROS.Info()( $"[{ThisNode.Name}] XmlRpc Server listening at " + uri );
       serverThread = new Thread( ServerThreadFunc ) { IsBackground = true };
       serverThread.Start();
     }
@@ -235,7 +235,7 @@ namespace Uml.Robotics.Ros
         functions.Clear();
       }
 
-      ROS.Debug()( "XmlRpc Server shutted down." );
+      //ROS.Debug()( $"[{ThisNode.Name}] XmlRpc Server shutted down." );
     }
   }
 }

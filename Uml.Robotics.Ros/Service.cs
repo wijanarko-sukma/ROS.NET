@@ -38,12 +38,12 @@ namespace Uml.Robotics.Ros
         }
         if( logFailureReason )
         {
-          ROS.Info()( "waitForService: Service[{0}] could not connect to host [{1}:{2}], waiting...", mappedName, host, port );
+          ROS.Info()( $"[{ThisNode.Name}] waitForService: Service[{mappedName}] could not connect to host [{host}:{port}], waiting..." );
         }
       }
       else if( logFailureReason )
       {
-        ROS.Info()( "waitForService: Service[{0}] has not been advertised, waiting...", mappedName );
+        ROS.Info()( $"[{ThisNode.Name}] waitForService: Service[{mappedName}] has not been advertised, waiting..." );
       }
       return false;
     }
@@ -70,7 +70,7 @@ namespace Uml.Robotics.Ros
 
       if( printed && ROS.ok )
       {
-        ROS.Info()( "waitForService: Service[{0}] is now available.", mapped_name );
+        ROS.Info()( $"[{ThisNode.Name}] waitForService: Service[{mapped_name}] is now available." );
       }
       return true;
     }

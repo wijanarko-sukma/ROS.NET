@@ -30,7 +30,7 @@ namespace Uml.Robotics.Ros
     public bool Initialize( Connection connection )
     {
       if( parent != null )
-        ROS.Debug()( "Init transport subscriber link: " + parent.Name );
+        ROS.Debug()( $"Init transport subscriber link: {parent.Name}" );
       this.connection = connection;
       connection.DroppedEvent += OnConnectionDropped;
       return true;
@@ -40,7 +40,7 @@ namespace Uml.Robotics.Ros
     {
       if( !header.Values.ContainsKey( "topic" ) )
       {
-        string msg = "Header from subscriber did not have the required element: topic";
+        string msg = $"[{ThisNode.Name}] Header from subscriber did not have the required element: topic";
         ROS.Warn()( msg );
         connection.sendHeaderError( ref msg );
         return false;
@@ -50,8 +50,7 @@ namespace Uml.Robotics.Ros
       Publication pt = TopicManager.Instance.lookupPublication( name );
       if( pt == null )
       {
-        string msg = "received a connection for a nonexistent topic [" + name + "] from [" +
-                     connection.transport + "] [" + client_callerid + "]";
+        string msg = $"[{ThisNode.Name}] received a connection for a nonexistent topic [{name}] from [{connection.transport}] [{client_callerid}]";
         ROS.Warn()( msg );
         connection.sendHeaderError( ref msg );
         return false;
@@ -60,7 +59,7 @@ namespace Uml.Robotics.Ros
       if( !pt.validateHeader( header, ref error_message ) )
       {
         connection.sendHeaderError( ref error_message );
-        ROS.Error()( error_message );
+        ROS.Error()( $"[{ThisNode.Name}] {error_message}" );
         return false;
       }
       destination_caller_id = client_callerid;
@@ -80,7 +79,7 @@ namespace Uml.Robotics.Ros
       m["latching"] = Convert.ToString( pt.Latch );
       connection.writeHeader( m, OnHeaderWritten );
       pt.addSubscriberLink( this );
-      ROS.Debug()( "Finalize transport subscriber link for " + name );
+      ROS.Debug()( $"[{ThisNode.Name}] Finalize transport subscriber link for {name}" );
       return true;
     }
 

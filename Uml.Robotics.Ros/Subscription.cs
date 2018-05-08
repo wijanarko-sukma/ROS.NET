@@ -104,21 +104,21 @@ namespace Uml.Robotics.Ros
     {
       lock( publisher_links_mutex )
       {
-        //ROS.Debug()("SUB: getInfo with " + publisher_links.Count + " publinks in list");
+        //ROS.Debug()( $"[{ThisNode.Name}] SUB: getInfo with {publisher_links.Count} publinks in list" );
         foreach( PublisherLink c in publisher_links )
         {
-          //ROS.Debug()("PUB: adding a curr_info to info!");
+          //ROS.Debug()( $"[{ThisNode.Name}] PUB: adding a curr_info to info!" );
           var curr_info = new XmlRpcValue();
           curr_info.Set( 0, (int)c.ConnectionID );
           curr_info.Set( 1, c.XmlRpcUri );
           curr_info.Set( 2, "i" );
           curr_info.Set( 3, c.TransportType );
           curr_info.Set( 4, name );
-          //ROS.Debug()("PUB curr_info DUMP:\n\t");
+          //ROS.Debug()( $"[{ThisNode.Name}] PUB curr_info DUMP:\n\t" );
           //curr_info.Dump();
           info.Set( info.Count, curr_info );
         }
-        //ROS.Debug()("SUB: outgoing info is of type: " + info.Type + " and has size: " + info.Size);
+        //ROS.Debug()( $"[{ThisNode.Name}] SUB: outgoing info is of type: {info.Type} and has size: {info.Size}" );
       }
     }
 
@@ -189,7 +189,7 @@ namespace Uml.Robotics.Ros
 
       bool retval = true;
 
-      ROS.Debug()( "Publisher update for [" + name + "]" );
+      ROS.Debug()( $"[{ThisNode.Name}] Publisher update for [{name}]" );
 
       var additions = new List<string>();
       List<PublisherLink> subtractions;
@@ -218,13 +218,12 @@ namespace Uml.Robotics.Ros
       {
         if( link.XmlRpcUri != XmlRpcManager.Instance.Uri )
         {
-          ROS.Debug()( "Disconnecting from publisher [" + link.CallerID + "] of topic [" + name +
-                      "] at [" + link.XmlRpcUri + "]" );
+          ROS.Debug()( $"[{ThisNode.Name}] Disconnecting from publisher [{link.CallerID}] of topic [{name}] at [{link.XmlRpcUri}]" );
           link.drop();
         }
         else
         {
-          ROS.Warn()( "Cannot disconnect from self for topic: " + name );
+          ROS.Warn()( $"[{ThisNode.Name}] Cannot disconnect from self for topic: {name}" );
         }
       }
 
@@ -236,7 +235,7 @@ namespace Uml.Robotics.Ros
           //ROS.Debug()("NEGOTIATINGING");
         }
         else
-          ROS.Info()( $"Skipping myself ({name}, {XmlRpcManager.Instance.Uri})" );
+          ROS.Info()( $"[{ThisNode.Name}] Skipping myself ({name}, {XmlRpcManager.Instance.Uri})" );
       }
       return retval;
     }
@@ -252,7 +251,7 @@ namespace Uml.Robotics.Ros
       Params.Set( 2, protos_array );
       if( !Network.SplitUri( xmlRpcUri, out string peerHost, out int peerPort ) )
       {
-        ROS.Error()( $"Bad xml-rpc URI: [{xmlRpcUri}]" );
+        ROS.Error()( $"[{ThisNode.Name}] Bad xml-rpc URI: [{xmlRpcUri}]" );
         return false;
       }
 
@@ -260,12 +259,12 @@ namespace Uml.Robotics.Ros
       var requestTopicTask = client.ExecuteAsync( "requestTopic", Params );
       if( requestTopicTask.IsFaulted )
       {
-        ROS.Error()( $"Failed to contact publisher [{peerHost}:{peerPort}for topic [{name}]" );
+        ROS.Error()( $"[{ThisNode.Name}] Failed to contact publisher [{peerHost}:{peerPort}for topic [{name}]" );
         return false;
 
       }
 
-      ROS.Debug()( $"Began asynchronous xmlrpc connection to http://{peerHost}:{peerPort}/ for topic [{name}]" );
+      ROS.Debug()( $"[{ThisNode.Name}] Began asynchronous xmlrpc connection to http://{peerHost}:{peerPort}/ for topic [{name}]" );
 
       var conn = new PendingConnection( client, requestTopicTask, xmlRpcUri );
       lock( pendingConnections )
@@ -283,7 +282,7 @@ namespace Uml.Robotics.Ros
       if( ex is System.Net.Sockets.SocketException )
       {
         System.Net.Sockets.SocketException socketEx = (System.Net.Sockets.SocketException)ex;
-        message = socketEx.Message + " + Native Error Code: " + socketEx.NativeErrorCode + " + Socket Error Code: " + socketEx.SocketErrorCode;
+        message = $"{socketEx.Message} + Native Error Code: {socketEx.NativeErrorCode} + Socket Error Code: {socketEx.SocketErrorCode}";
       }
       else
       {
@@ -292,7 +291,7 @@ namespace Uml.Robotics.Ros
 
       if( ex.InnerException != null )
       {
-        message += " - " + BuildExceptionMessages( ex.InnerException );
+        message += $" - {BuildExceptionMessages( ex.InnerException )}";
       }
 
       return message;
@@ -314,13 +313,13 @@ namespace Uml.Robotics.Ros
           errorMessages.Add( BuildExceptionMessages( exception ) );
         }
 
-        ROS.Warn()( $"Negotiating for {name} has failed (Error: {string.Join( ", ", errorMessages.ToArray() )})." );
+        ROS.Warn()( $"[{ThisNode.Name}] Negotiating for {name} has failed (Error: {string.Join( ", ", errorMessages.ToArray() )})." );
         return;
       }
 
       if( !callTask.Result.Success )
       {
-        ROS.Warn()( $"Negotiating for {name} has failed. XML-RCP call failed." );
+        ROS.Warn()( $"[{ThisNode.Name}] Negotiating for {name} has failed. XML-RCP call failed." );
         return;
       }
 
@@ -335,42 +334,40 @@ namespace Uml.Robotics.Ros
       var proto = new XmlRpcValue();
       if( !XmlRpcManager.Instance.ValidateXmlRpcResponse( "requestTopic", resultValue, proto ) )
       {
-        ROS.Warn()( $"Negotiating for {name} has failed." );
+        ROS.Warn()( $"[{ThisNode.Name}] Negotiating for {name} has failed." );
         return;
       }
 
       string peerHost = conn.Client.Host;
       int peerPort = conn.Client.Port;
-      string xmlrpcUri = "http://" + peerHost + ":" + peerPort + "/";
+      string xmlrpcUri = $"http://{peerHost}:{peerPort}/";
       if( proto.Count == 0 )
       {
-        ROS.Debug()(
-            $"Could not agree on any common protocols with [{xmlrpcUri}] for topic [{name}]"
-        );
+        ROS.Debug()( $"[{ThisNode.Name}] Could not agree on any common protocols with [{xmlrpcUri}] for topic [{name}]" );
         return;
       }
       if( proto.Type != XmlRpcType.Array )
       {
-        ROS.Warn()( $"Available protocol info returned from {xmlrpcUri} is not a list." );
+        ROS.Warn()( $"[{ThisNode.Name}] Available protocol info returned from {xmlrpcUri} is not a list." );
         return;
       }
 
       string protoName = proto[0].GetString();
       if( protoName == "UDPROS" )
       {
-        ROS.Error()( "UDP is currently not supported. Use TCPROS instead." );
+        ROS.Error()( $"[{ThisNode.Name}] UDP is currently not supported. Use TCPROS instead." );
       }
       else if( protoName == "TCPROS" )
       {
         if( proto.Count != 3 || proto[1].Type != XmlRpcType.String || proto[2].Type != XmlRpcType.Int )
         {
-          ROS.Warn()( "TcpRos Publisher should implement string, int as parameter" );
+          ROS.Warn()( $"[{ThisNode.Name}] TcpRos Publisher should implement string, int as parameter" );
           return;
         }
 
         string pubHost = proto[1].GetString();
         int pubPort = proto[2].GetInt();
-        ROS.Debug()( $"Connecting via tcpros to topic [{name}] at host [{pubHost}:{pubPort}]" );
+        ROS.Debug()( $"[{ThisNode.Name}] Connecting via tcpros to topic [{name}] at host [{pubHost}:{pubPort}]" );
 
         var transport = new TcpTransport( PollManager.Instance.poll_set ) { _topic = name };
         if( transport.connect( pubHost, pubPort ) )
@@ -388,16 +385,16 @@ namespace Uml.Robotics.Ros
             addPublisherLink( pubLink );
           }
 
-          ROS.Debug()( $"Connected to publisher of topic [{name}] at  [{pubHost}:{pubPort}]" );
+          ROS.Debug()( $"[{ThisNode.Name}] Connected to publisher of topic [{name}] at  [{pubHost}:{pubPort}]" );
         }
         else
         {
-          ROS.Error()( $"Failed to connect to publisher of topic [{name}] at [{pubHost}:{pubPort}]" );
+          ROS.Error()( $"[{ThisNode.Name}] Failed to connect to publisher of topic [{name}] at [{pubHost}:{pubPort}]" );
         }
       }
       else
       {
-        ROS.Error()( "The XmlRpc Server does not provide a supported protocol." );
+        ROS.Error()( $"[{ThisNode.Name}] The XmlRpc Server does not provide a supported protocol." );
       }
 
     }
@@ -555,7 +552,7 @@ namespace Uml.Robotics.Ros
         if( _dropped )
           return;
 
-        ROS.Info()( "Creating intraprocess link for topic [{0}]", name );
+        ROS.Info()( $"[{ThisNode.Name}] Creating intraprocess link for topic [{name}]" );
 
         var pub_link = new LocalPublisherLink( this, XmlRpcManager.Instance.Uri );
         var sub_link = new LocalSubscriberLink( pub );

@@ -65,12 +65,12 @@ namespace Uml.Robotics.XmlRpc
       }
       catch( SocketException ex )
       {
-        Console.WriteLine( "XmlRpcServerConnection::readHeader: error while reading header ({0}).", ex.Message );
+        //Console.WriteLine( "XmlRpcServerConnection::readHeader: error while reading header ({0}).", ex.Message );
         return false;
       }
       catch( Exception ex )
       {
-        Console.WriteLine( "XmlRpcServerConnection::readHeader: error while reading header ({0}).", ex.Message );
+        //Console.WriteLine( "XmlRpcServerConnection::readHeader: error while reading header ({0}).", ex.Message );
         return false;
       }
 

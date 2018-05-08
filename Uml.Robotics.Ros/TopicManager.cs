@@ -167,10 +167,7 @@ namespace Uml.Robotics.Ros
         throw new Exception( "Advertising on topic [" + ops.topic + "] with an empty datatype" );
       if( string.IsNullOrEmpty( ops.messageDefinition ) )
       {
-        ROS.Warn()(
-            "Advertising on topic [" + ops.topic +
-             "] with an empty message definition. Some tools may not work correctly"
-        );
+        ROS.Warn()( $"[{ThisNode.Name}] Advertising on topic [{ops.topic}] with an empty message definition. Some tools may not work correctly" );
       }
       return true;
     }
@@ -198,11 +195,7 @@ namespace Uml.Robotics.Ros
         {
           if( pub.Md5sum != ops.md5Sum )
           {
-            ROS.Error()(
-                "Tried to advertise on topic [{0}] with md5sum [{1}] and datatype [{2}], but the topic is already advertised as md5sum [{3}] and datatype [{4}]",
-                ops.topic, ops.md5Sum,
-                ops.dataType, pub.Md5sum, pub.DataType
-            );
+            ROS.Error()( $"[{ThisNode.Name}] Tried to advertise on topic [{ops.topic}] with md5sum [{ops.md5Sum}] and datatype [{ops.dataType}], but the topic is already advertised as md5sum [{pub.Md5sum}] and datatype [{pub.DataType}]" );
             return false;
           }
         }
@@ -237,7 +230,7 @@ namespace Uml.Robotics.Ros
 
       if( !Master.execute( "registerPublisher", args, result, payload, true ) )
       {
-        ROS.Error()( "RPC \"registerService\" for service " + ops.topic + " failed." );
+        ROS.Error()( $"[{ThisNode.Name}] RPC \"registerService\" for service {ops.topic} failed." );
         return false;
       }
 
@@ -267,7 +260,7 @@ namespace Uml.Robotics.Ros
       s.addCallback( ops.helper, ops.md5sum, ops.callback_queue, ops.queue_size, ops.allow_concurrent_callbacks, ops.topic );
       if( !registerSubscriber( s, ops.datatype ) )
       {
-        string error = $"Couldn't register subscriber on topic [{ops.topic}]";
+        string error = $"[{ThisNode.Name}] Couldn't register subscriber on topic [{ops.topic}]";
         s.shutdown();
         ROS.Error()( error );
         throw new RosException( error );
@@ -315,7 +308,7 @@ namespace Uml.Robotics.Ros
         }
 
         if( !unregisterSubscriber( topic ) )
-          ROS.Warn()( "Couldn't unregister subscriber for topic [" + topic + "]" );
+          ROS.Warn()( $"[{ThisNode.Name}] Couldn't unregister subscriber for topic [{topic}]" );
 
         sub.shutdown();
         return true;
@@ -463,13 +456,12 @@ namespace Uml.Robotics.Ros
         XmlRpcValue proto = protos[proto_idx];
         if( proto.Type != XmlRpcType.Array )
         {
-          ROS.Error()( "requestTopic protocol list was not a list of lists" );
+          ROS.Error()( $"[{ThisNode.Name}] requestTopic protocol list was not a list of lists" );
           return false;
         }
         if( proto[0].Type != XmlRpcType.String )
         {
-          ROS.Error()(
-              "requestTopic received a protocol list in which a sublist did not start with a string" );
+          ROS.Error()( $"[{ThisNode.Name}] requestTopic received a protocol list in which a sublist did not start with a string" );
           return false;
         }
 
@@ -485,15 +477,15 @@ namespace Uml.Robotics.Ros
         }
         if( proto_name == "UDPROS" )
         {
-          ROS.Warn()( "Ignoring topics with UdpRos as protocol" );
+          ROS.Warn()( $"[{ThisNode.Name}] Ignoring topics with UdpRos as protocol" );
         }
         else
         {
-          ROS.Warn()( "An unsupported protocol was offered: [{0}]", proto_name );
+          ROS.Warn()( $"[{ThisNode.Name}] An unsupported protocol was offered: [{0}]", proto_name );
         }
       }
 
-      ROS.Error()( "No supported protocol was provided" );
+      ROS.Error()( $"[{ThisNode.Name}] No supported protocol was provided" );
       return false;
     }
 
@@ -513,7 +505,7 @@ namespace Uml.Robotics.Ros
       var payload = new XmlRpcValue();
       if( !Master.execute( "registerSubscriber", args, result, payload, true ) )
       {
-        ROS.Error()( "RPC \"registerSubscriber\" for service " + s.name + " failed." );
+        ROS.Error()( $"[{ThisNode.Name}] RPC \"registerSubscriber\" for service {s.name} failed." );
         return false;
       }
       var pub_uris = new List<string>();
@@ -564,7 +556,7 @@ namespace Uml.Robotics.Ros
       // Ignore exception during unregister
       catch( Exception e )
       {
-        // ROS.Error()(e.Message);
+        // ROS.Error()( $"[{ThisNode.Name}] {e.Message}" );
       }
       return unregisterSuccess;
     }
@@ -584,7 +576,7 @@ namespace Uml.Robotics.Ros
       // Ignore exception during unregister
       catch( Exception e )
       {
-        // ROS.Error()(e.Message);
+        // ROS.Error()( $"[{ThisNode.Name}] {e.Message}" );
       }
       return unregisterSuccess;
     }
@@ -688,7 +680,7 @@ namespace Uml.Robotics.Ros
 
     public bool pubUpdate( string topic, List<string> pubs )
     {
-      ROS.Debug()( "TopicManager is updating publishers for " + topic );
+      ROS.Debug()( $"[{ThisNode.Name}] TopicManager is updating publishers for {topic}" );
 
       Subscription sub = null;
       lock( subcriptionsMutex )
@@ -706,9 +698,7 @@ namespace Uml.Robotics.Ros
       }
       if( sub != null )
         return sub.pubUpdate( pubs );
-      ROS.Info()(
-          "Request for updating publishers of topic " + topic + ", which has no subscribers."
-      );
+      ROS.Info()( $"[{ThisNode.Name}] Request for updating publishers of topic {topic}, which has no subscribers." );
       return false;
     }
 
@@ -722,7 +712,7 @@ namespace Uml.Robotics.Ros
         XmlRpcManager.ResponseInt( 1, "", 0 )( result );
       else
       {
-        const string error = "Unknown error while handling XmlRpc call to pubUpdate";
+        string error = $"[{ThisNode.Name}] Unknown error while handling XmlRpc call to pubUpdate";
         ROS.Error()( error );
         XmlRpcManager.ResponseInt( 0, error, 0 )( result );
       }
@@ -736,7 +726,7 @@ namespace Uml.Robotics.Ros
       //result = res.instance;
       if( !requestTopic( parm[1].GetString(), parm[2], ref res ) )
       {
-        const string error = "Unknown error while handling XmlRpc call to requestTopic";
+        string error = $"[{ThisNode.Name}] Unknown error while handling XmlRpc call to requestTopic";
         ROS.Error()( error );
         XmlRpcManager.ResponseInt( 0, error, 0 )( res );
       }

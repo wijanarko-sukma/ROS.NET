@@ -152,7 +152,7 @@ namespace Uml.Robotics.Ros
 
     public void AddPollThreadListener( Action poll )
     {
-      ROS.Debug()( "Adding pollthreadlistener " + poll.Target + ":" + poll.GetMethodInfo().Name );
+      ROS.Debug()( $"[{ThisNode.Name}] Adding pollthreadlistener {poll.Target}:{poll.GetMethodInfo().Name}" );
       lock( signal_mutex )
       {
         signals.Add( new PollSignal( poll ) );
@@ -186,7 +186,7 @@ namespace Uml.Robotics.Ros
         if( shutting_down )
           return;
       }
-      ROS.Debug()( "PollManager thread finished" );
+      ROS.Debug()( $"[{ThisNode.Name}] PollManager thread finished" );
     }
 
 
@@ -211,7 +211,7 @@ namespace Uml.Robotics.Ros
         signals.Clear();
         if( !thread.Join( 2000 ) )
         {
-          ROS.Error()( "thread.Join() timed out." );
+          ROS.Error()( $"[{ThisNode.Name}] thread.Join() timed out." );
         }
         thread = null;
       }

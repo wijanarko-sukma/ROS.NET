@@ -94,7 +94,7 @@ namespace Uml.Robotics.Ros.ActionLib
     public void SetCanceled( TResult result, string text )
     {
       text = text ?? "";
-      ROS.Debug()( $"Setting status to canceled on goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
+      ROS.Debug()( $"[{ThisNode.Name}] Setting status to canceled on goal, id: {GoalId.id}, stamp: {GoalId.stamp}" );
       if( ( GoalStatus.status == GoalStatus.PENDING ) || ( GoalStatus.status == GoalStatus.RECALLING ) )
       {
         SetGoalResult( GoalStatus.RECALLED, text, result );

@@ -77,7 +77,7 @@ namespace Uml.Robotics.Ros
       }
       else
       {
-        ROS.Error()( "Null pollset in tcptransport ctor" );
+        ROS.Error()( $"[{ThisNode.Name}] Null pollset in tcptransport ctor" );
       }
       this.flags = flags;
     }
@@ -117,7 +117,7 @@ namespace Uml.Robotics.Ros
         }
         catch( Exception e )
         {
-          ROS.Error()( e.ToString() );
+          ROS.Error()( $"[{ThisNode.Name}] {e.ToString()}" );
           close();
           return false;
         }
@@ -134,7 +134,7 @@ namespace Uml.Robotics.Ros
       }
       catch( Exception e )
       {
-        ROS.Error()( e.ToString() );
+        ROS.Error()( $"[{ThisNode.Name}] {e.ToString()}" );
       }
     }
 
@@ -218,7 +218,7 @@ namespace Uml.Robotics.Ros
       connectedHost = host;
       connectedPort = port;
       if( !setNonBlocking() )
-        throw new Exception( "Failed to make socket nonblocking" );
+        throw new Exception( $"[{ThisNode.Name}] Failed to make socket nonblocking" );
       setNoDelay( true );
 
       IPAddress ip;
@@ -228,7 +228,7 @@ namespace Uml.Robotics.Ros
         if( ip == null )
         {
           close();
-          ROS.Error()( "Couldn't resolve host name [{0}]", host );
+          ROS.Error()( $"[{ThisNode.Name}] Couldn't resolve host name [{host}]" );
           return false;
         }
       }
@@ -252,7 +252,7 @@ namespace Uml.Robotics.Ros
              }
              catch( Exception e )
              {
-               ROS.Error()( e.ToString() );
+               ROS.Error()( $"[{ThisNode.Name}] {e.ToString()}" );
              }
            }
          }
@@ -266,7 +266,7 @@ namespace Uml.Robotics.Ros
           break;
         if( DateTime.UtcNow.Subtract( connectionAttempted ).TotalSeconds >= 3 )
         {
-          ROS.Info()( "Trying to connect for " + DateTime.UtcNow.Subtract( connectionAttempted ).TotalSeconds + "s\t: " + this );
+          ROS.Info()( $"[{ThisNode.Name}] Trying to connect for {DateTime.UtcNow.Subtract( connectionAttempted ).TotalSeconds}s\t: {this}" );
           if( !asyncres.AsyncWaitHandle.WaitOne( 100 ) )
           {
             socket.Close();
@@ -281,7 +281,7 @@ namespace Uml.Robotics.Ros
       }
       else
       {
-        ROS.Debug()( "TcpTransport connection established." );
+        ROS.Debug()( $"[{ThisNode.Name}] TcpTransport connection established." );
       }
 
       return ROS.ok && initializeSocket();
@@ -347,7 +347,7 @@ namespace Uml.Robotics.Ros
           }
           catch( Exception e )
           {
-            ROS.Error()( e.ToString() );
+            ROS.Error()( $"[{ThisNode.Name}] {e.ToString()}" );
             return;
           }
         }
@@ -444,7 +444,7 @@ namespace Uml.Robotics.Ros
 
       if( args.AcceptSocket == null )
       {
-        ROS.Error()( "Nothing to accept, return null" );
+        ROS.Error()( $"[{ThisNode.Name}] Nothing to accept, return null" );
         return null;
       }
 
@@ -506,10 +506,10 @@ namespace Uml.Robotics.Ros
           }
           catch( Exception e )
           {
-            ROS.Error()( "Failed to get sock options! (error: " + error + ")" + e );
+            ROS.Error()( $"[{ThisNode.Name}] Failed to get sock options! (error: {error}){e}" );
           }
           if( error != 0 )
-            ROS.Error()( "Socket error = " + error );
+            ROS.Error()( $"[{ThisNode.Name}] Socket error = {error}" );
           close();
         }
       }

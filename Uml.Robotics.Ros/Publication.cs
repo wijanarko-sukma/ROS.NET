@@ -150,7 +150,7 @@ namespace Uml.Robotics.Ros
       if( !header.Values.ContainsKey( "md5sum" ) || !header.Values.ContainsKey( "topic" ) ||
           !header.Values.ContainsKey( "callerid" ) )
       {
-        const string msg = "Header from subscriber did not have the required elements: md5sum, topic, callerid";
+        string msg = $"[{ThisNode.Name}] Header from subscriber did not have the required elements: md5sum, topic, callerid";
         ROS.Warn()( msg );
         error_message = msg;
         return false;
@@ -160,8 +160,7 @@ namespace Uml.Robotics.Ros
       client_callerid = (string)header.Values["callerid"];
       if( Dropped )
       {
-        string msg = "Received a tcpros connection for a nonexistent topic [" + topic + "] from [" +
-                     client_callerid + "].";
+        string msg = $"[{ThisNode.Name}] Received a tcpros connection for a nonexistent topic [{topic}] from [{client_callerid}].";
         ROS.Warn()( msg );
         error_message = msg;
         return false;
@@ -170,9 +169,7 @@ namespace Uml.Robotics.Ros
       if( Md5sum != md5sum && ( md5sum != "*" ) && Md5sum != "*" )
       {
         string datatype = header.Values.ContainsKey( "type" ) ? (string)header.Values["type"] : "unknown";
-        string msg = "Client [" + client_callerid + "] wants topic [" + topic + "] to hava datatype/md5sum [" +
-                     datatype + "/" + md5sum + "], but our version has [" + DataType + "/" + Md5sum +
-                     "]. Dropping connection";
+        string msg = $"[{ThisNode.Name}] Client [{client_callerid}] wants topic [{topic}] to hava datatype/md5sum [{datatype}/{md5sum}], but our version has [{DataType}/{Md5sum}]. Dropping connection";
         ROS.Warn()( msg );
         error_message = msg;
         return false;
@@ -291,7 +288,7 @@ namespace Uml.Robotics.Ros
 
     public void peerConnect( SubscriberLink sub_link )
     {
-      //ROS.Debug()($"PEER CONNECT: Id: {sub_link.connection_id} Dest: {sub_link.destination_caller_id} Topic: {sub_link.topic}");
+      //ROS.Debug()( $"[{ThisNode.Name}] PEER CONNECT: Id: {sub_link.connection_id} Dest: {sub_link.destination_caller_id} Topic: {sub_link.topic}" );
       foreach( SubscriberCallbacks cbs in callbacks )
       {
         if( cbs.connect != null && cbs.CallbackQueue != null )
@@ -305,7 +302,7 @@ namespace Uml.Robotics.Ros
 
     public void peerDisconnect( SubscriberLink sub_link )
     {
-      //ROS.Debug()("PEER DISCONNECT: [" + sub_link.topic + "]");
+      //ROS.Debug()( $"[{ThisNode.Name}]  PEER DISCONNECT: [{sub_link.topic}]" );
       foreach( SubscriberCallbacks cbs in callbacks )
       {
         if( cbs.disconnect != null && cbs.CallbackQueue != null )
@@ -369,9 +366,9 @@ namespace Uml.Robotics.Ros
 
     internal override CallResult Call()
     {
-      ROS.Debug()( "Called PeerConnDisconnCallback" );
+      ROS.Debug()( $"[{ThisNode.Name}] Called PeerConnDisconnCallback" );
       SingleSubscriberPublisher pub = new SingleSubscriberPublisher( sub_link );
-      ROS.Debug()( $"Callback: Name: {pub.SubscriberName} Topic: {pub.Topic}" );
+      ROS.Debug()( $"[{ThisNode.Name}] Callback: Name: {pub.SubscriberName} Topic: {pub.Topic}" );
       callback( pub );
       return CallResult.Success;
     }

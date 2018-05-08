@@ -46,7 +46,7 @@ namespace Uml.Robotics.Ros
       }
       catch( Exception e )
       {
-        ROS.Error()( e.ToString() );
+        ROS.Error()( $"[{Name}] {e.ToString()}" );
       }
       if( ( options & (int)InitOption.AnonymousName ) == (int)InitOption.AnonymousName && !disableAnonymous )
       {

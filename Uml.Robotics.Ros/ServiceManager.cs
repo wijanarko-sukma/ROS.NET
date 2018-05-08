@@ -161,7 +161,7 @@ namespace Uml.Robotics.Ros
       {
         if( IsServiceAdvertised( ops.service ) )
         {
-          ROS.Warn()( "Tried to advertise  a service that is already advertised in this node [{0}]", ops.service );
+          ROS.Warn()( $"[{ThisNode.Name}] Tried to advertise  a service that is already advertised in this node [{0}]", ops.service );
           return false;
         }
         if( ops.helper == null )
@@ -251,18 +251,18 @@ namespace Uml.Robotics.Ros
       args.Set( 1, name );
       if( !Master.execute( "lookupService", args, result, payload, false ) )
       {
-        ROS.Warn()( "Service [{0}]: Not available at ROS master", name );
+        ROS.Warn()( $"[{ThisNode.Name}] Service [{name}]: Not available at ROS master" );
         return false;
       }
       string serv_uri = payload.GetString();
       if( serv_uri.Length == 0 )
       {
-        ROS.Error()( "Service [{0}]: Empty server URI returned from master", name );
+        ROS.Error()( $"[{ThisNode.Name}] Service [{name}]: Empty server URI returned from master" );
         return false;
       }
       if( !Network.SplitUri( serv_uri, out serv_host, out serv_port ) )
       {
-        ROS.Error()( "Service [{0}]: Bad service uri [{0}]", name, serv_uri );
+        ROS.Error()( $"[{ThisNode.Name}] Service [{name}]: Bad service uri [{serv_uri}]" );
         return false;
       }
       return true;

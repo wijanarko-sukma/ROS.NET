@@ -140,7 +140,7 @@ namespace Uml.Robotics.Ros.ActionLib
 
       // Publish goal message
       GoalPublisher.publish( goalAction );
-      ROS.Debug()( "Goal published" );
+      ROS.Debug()( $"[{ThisNode.Name}] Goal published" );
 
       return goalHandle;
     }
@@ -478,7 +478,7 @@ namespace Uml.Robotics.Ros.ActionLib
       bool callerIdPresent = statusArray.connection_header.TryGetValue( "callerid", out callerId );
       if( callerIdPresent )
       {
-        ROS.Debug()( $"[{ThisNode.Name}] Getting status over the wire (callerid: {callerId}; count: {statusArray.status_list.Length})." );
+        //ROS.Debug()( $"[{ThisNode.Name}] Getting status over the wire (callerid: {callerId}; count: {statusArray.status_list.Length})." );
 
         if( statusReceived )
         {

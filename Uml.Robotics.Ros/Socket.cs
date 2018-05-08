@@ -64,7 +64,7 @@ namespace Uml.Robotics.Ros
     public Socket( ns.AddressFamily addressFamily, ns.SocketType socketType, ns.ProtocolType protocolType )
         : this( new ns.Socket( addressFamily, socketType, protocolType ) )
     {
-      //ROS.Debug()("Making socket w/ FD=" + FD);
+      //ROS.Debug()( $"[{ThisNode.Name}] Making socket w/ FD={FD}" );
     }
 
     public bool IsDisposed
@@ -206,7 +206,7 @@ namespace Uml.Robotics.Ros
       }
       catch( ns.SocketException e )
       {
-        ROS.Error()( e.ToString() );
+        ROS.Error()( $"[{ThisNode.Name}] {e.ToString()}" );
         res = !disposed && sm == ns.SelectMode.SelectError;
       }
       return res;

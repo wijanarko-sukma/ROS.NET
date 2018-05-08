@@ -38,7 +38,7 @@ namespace Uml.Robotics.Ros
     public void Spin( CancellationToken token )
     {
       TimeSpan wallDuration = new TimeSpan( 0, 0, 0, 0, ROS.WallDuration );
-      ROS.Info()( "Start spinning" );
+      ROS.Info()( $"[{ThisNode.Name}] Start spinning" );
       while( ROS.ok )
       {
         DateTime begin = DateTime.UtcNow;

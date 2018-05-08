@@ -216,7 +216,7 @@ namespace Uml.Robotics.Ros
       }
       catch( Exception ex )
       {
-        ROS.Error()( "Error starting timer: " + ex );
+        ROS.Error()( $"[{ThisNode.Name}] Error starting timer: {ex}" );
       }
     }
 
@@ -238,7 +238,7 @@ namespace Uml.Robotics.Ros
       }
       catch( Exception ex )
       {
-        ROS.Error()( "Error starting timer: " + ex );
+        ROS.Error()( $"[{ThisNode.Name}] Error starting timer: {ex}" );
       }
     }
 
@@ -267,7 +267,7 @@ namespace Uml.Robotics.Ros
       }
       catch( Exception ex )
       {
-        ROS.Error()( "Error starting timer: " + ex );
+        ROS.Error()( $"[{ThisNode.Name}] Error starting timer: {ex}" );
       }
     }
   }

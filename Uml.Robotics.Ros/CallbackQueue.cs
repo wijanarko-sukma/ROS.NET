@@ -37,14 +37,14 @@ namespace Uml.Robotics.Ros
     {
       long owner_id = cb.Uid;
       CallbackInfo info = new CallbackInfo { Callback = cb, RemovalId = owner_id };
-      //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: Add callback owner: {owner_id} {cb.ToString()}");
+      //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: Add callback owner: {owner_id} {cb.ToString()}" );
 
       lock( mutex )
       {
         if( !enabled )
           return;
         callbacks.Add( info );
-        //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: Added");
+        //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: Added" );
         count++;
       }
       lock( idInfoMutex )
@@ -72,7 +72,7 @@ namespace Uml.Robotics.Ros
         if( !sem.WaitOne( timeout ) )
           return;
       }
-      //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: Enqueue TLS");
+      //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: Enqueue TLS" );
       lock( mutex )
       {
         if( count == 0 )
@@ -84,10 +84,10 @@ namespace Uml.Robotics.Ros
         count = 0;
         calling += tls.Count;
       }
-      //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: TLS count {tls.Count}");
+      //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: TLS count {tls.Count}" );
       while( tls.Count > 0 && ROS.ok )
       {
-        //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: call {tls.head.Callback.ToString()}");
+        //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: call {tls.head.Callback.ToString()}" );
         if( CallOne( tls ) != CallOneResult.Empty )
           ++called;
       }
@@ -147,7 +147,7 @@ namespace Uml.Robotics.Ros
         RemoveAll( ownerId );
       else
       {
-        ROS.Debug()( "removeByID w/ WRONG THREAD ID" );
+        ROS.Debug()( $"[{ThisNode.Name}] removeByID w/ WRONG THREAD ID" );
         RemoveAll( ownerId );
       }
     }
@@ -174,7 +174,7 @@ namespace Uml.Robotics.Ros
             }
             catch( Exception ex )
             {
-              ROS.Error()( "Error during callback. Error: %s, Stacktrace: %s", ex.ToString(), ex.StackTrace );
+              ROS.Error()( $"[{ThisNode.Name}] Error during callback. Error: {ex.ToString()}, Stacktrace: {ex.StackTrace}" );
             }
           }
           if( result == CallbackInterface.CallResult.TryAgain && !info.MarkedForRemoval )

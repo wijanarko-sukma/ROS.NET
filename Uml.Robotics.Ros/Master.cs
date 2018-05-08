@@ -167,9 +167,9 @@ namespace Uml.Robotics.Ros
             else
             {
               if( response.IsArray && response.Count >= 2 )
-                ROS.Error()( "Execute failed: return={0}, desc={1}", response[0].GetInt(), response[1].GetString() );
+                ROS.Error()( $"[{ThisNode.Name}] Execute failed: return={response[0].GetInt()}, desc={response[1].GetString()}" );
               else
-                ROS.Error()( "response type: " + response.Type.ToString() );
+                ROS.Error()( $"[{ThisNode.Name}] response type: {response.Type.ToString()}" );
             }
           }
           catch( Exception ex )
@@ -179,17 +179,14 @@ namespace Uml.Robotics.Ros
             {
               if( !supprressWarning )
               {
-                ROS.Warn()(
-                    $"[{method}] Could not connect to master at [{host}:{port}]. Retrying for the next {retryTimeout.TotalSeconds} seconds."
-                );
+                ROS.Warn()( $"[{ThisNode.Name}] [{method}] Could not connect to master at [{host}:{port}]. Retrying for the next {retryTimeout.TotalSeconds} seconds." );
                 supprressWarning = true;
               }
 
               // timeout expired, throw exception
               if( retryTimeout.TotalSeconds > 0 && DateTime.UtcNow.Subtract( startTime ) > retryTimeout )
               {
-                ROS.Error()( "[{0}] Timed out trying to connect to the master [{1}:{2}] after [{1}] seconds",
-                                method, host, port, retryTimeout.TotalSeconds );
+                ROS.Error()( $"[{ThisNode.Name}] [{method}] Timed out trying to connect to the master [{host}:{port}] after [{retryTimeout.TotalSeconds}] seconds" );
 
                 throw new RosException( $"Cannot connect to ROS Master at {host}:{port}", ex );
               }
@@ -209,9 +206,9 @@ namespace Uml.Robotics.Ros
       }
       catch( ArgumentNullException e )
       {
-        ROS.Error()( e.ToString() );
+        ROS.Error()( $"[{ThisNode.Name}] {e.ToString()}" );
       }
-      ROS.Error()( "Master API call: {0} failed!\n\tRequest:\n{1}", method, request );
+      ROS.Error()( $"[{ThisNode.Name}] Master API call: {method} failed!\n\tRequest:\n{request}" );
       return false;
     }
 

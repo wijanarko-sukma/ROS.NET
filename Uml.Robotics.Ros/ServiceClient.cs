@@ -102,17 +102,17 @@ namespace Uml.Robotics.Ros
     {
       if( service_md5sum != md5sum )
       {
-        ROS.Error()( "Call to service [{0} with md5sum [{1} does not match md5sum when the handle was created([{2}])", service, service_md5sum, md5sum );
+        ROS.Error()( $"[{ThisNode.Name}] Call to service [{service} with md5sum [{service_md5sum} does not match md5sum when the handle was created([{md5sum}])" );
         return false;
       }
       if( server_link != null && server_link.connection.dropped )
       {
         if( persistent )
-          ROS.Warn()( "Persistent service client's server link has been dropped. Trying to reconnect to proceed with this call" );
+          ROS.Warn()( $"[{ThisNode.Name}] Persistent service client's server link has been dropped. Trying to reconnect to proceed with this call" );
         server_link = null;
       }
       if( is_shutdown && persistent )
-        ROS.Warn()( "Persistent service client is self-resurrecting" );
+        ROS.Warn()( $"[{ThisNode.Name}] Persistent service client is self-resurrecting" );
       is_shutdown = false;
       if( persistent && server_link == null || !persistent )
       {

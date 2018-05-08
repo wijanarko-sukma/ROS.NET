@@ -209,7 +209,7 @@ namespace Uml.Robotics.Ros
         if( header.Values.ContainsKey( "error" ) )
         {
           error_val = (string)header.Values["error"];
-          ROS.Info()( "Received error message in header for connection to [{0}]: [{1}]", "TCPROS connection to [" + transport.cachedRemoteHost + "]", error_val );
+          ROS.Info()( $"[{ThisNode.Name}] Received error message in header for connection to [TCPROS connection to [{transport.cachedRemoteHost}]]: [{error_val}]" );
           drop( DropReason.HeaderError );
           return false;
         }
@@ -274,7 +274,7 @@ namespace Uml.Robotics.Ros
     {
       lock( reading )
       {
-        //ROS.Debug()("READ - "+transport.poll_set);
+        //ROS.Debug()( $"[{ThisNode.Name}] READ - {transport.poll_set}" );
         if( dropped )
           return;
 
@@ -286,12 +286,12 @@ namespace Uml.Robotics.Ros
         {
           int to_read = read_size - read_filled;
           if( to_read > 0 && read_buffer == null )
-            throw new Exception( $"Trying to read {to_read} bytes with a null read_buffer." );
+            throw new Exception( $"[{ThisNode.Name}] Trying to read {to_read} bytes with a null read_buffer." );
           if( callback == null )
             lock( read_callback_mutex )
               callback = read_callback;
           if( callback == null )
-            throw new Exception( "Cannot determine which read_callback to invoke." );
+            throw new Exception( $"[{ThisNode.Name}] Cannot determine which read_callback to invoke." );
           if( to_read > 0 )
           {
             int bytes_read = transport.read( read_buffer, read_filled, to_read );
@@ -311,7 +311,7 @@ namespace Uml.Robotics.Ros
               read_filled = 0;
               if( !callback( this, buffer, size, false ) )
               {
-                ROS.Error()( "Callbacks invoked by connection errored" );
+                ROS.Error()( $"[{ThisNode.Name}] Callbacks invoked by connection errored" );
               }
               callback = null;
               lock( read_callback_mutex )
@@ -348,7 +348,7 @@ namespace Uml.Robotics.Ros
             read_size = 0;
             if( !callback( this, buffer, size, true ) )
             {
-              ROS.Error()( "Callbacks invoked by connection errored" );
+              ROS.Error()( $"[{ThisNode.Name}] Callbacks invoked by connection errored" );
             }
             lock( read_callback_mutex )
             {
@@ -398,7 +398,7 @@ namespace Uml.Robotics.Ros
             write_size = 0;
             if( !callback( this ) )
             {
-              ROS.Error()( "Failed to invoke " + callback.GetMethodInfo().Name );
+              ROS.Error()( $"[{ThisNode.Name}] Failed to invoke {callback.GetMethodInfo().Name}" );
             }
           }
         }

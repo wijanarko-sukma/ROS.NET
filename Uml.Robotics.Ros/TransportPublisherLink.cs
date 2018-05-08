@@ -35,7 +35,7 @@ namespace Uml.Robotics.Ros
 
     public bool initialize( Connection connection )
     {
-      ROS.Debug()( "Init transport publisher link: " + parent.name );
+      ROS.Debug()( $"[{ThisNode.Name}] Init transport publisher link: {parent.name }" );
       this.connection = connection;
       connection.DroppedEvent += onConnectionDropped;
       if( connection.transport.getRequiresHeader() )
@@ -65,13 +65,13 @@ namespace Uml.Robotics.Ros
         parent.removePublisherLink( this );
       else
       {
-        ROS.Debug()( "Last publisher link removed" );
+        ROS.Debug()( $"[{ThisNode.Name}] Last publisher link removed" );
       }
     }
 
     private void onConnectionDropped( Connection conn, Connection.DropReason reason )
     {
-      ROS.Debug()( "TransportPublisherLink: onConnectionDropped -- " + reason );
+      ROS.Debug()( $"[{ThisNode.Name}] TransportPublisherLink: onConnectionDropped -- {reason}" );
 
       if( dropping || conn != connection )
         return;
@@ -92,8 +92,7 @@ namespace Uml.Robotics.Ros
       {
         if( reason == Connection.DropReason.HeaderError )
         {
-          ROS.Error()( "Error in the Header: " +
-                          ( parent != null ? parent.name : "unknown" ) );
+          ROS.Error()( $"[{ThisNode.Name}] Error in the Header: {( parent != null ? parent.name : "unknown" )}" );
         }
         drop();
       }
@@ -146,7 +145,7 @@ namespace Uml.Robotics.Ros
       int lengthLimit = 1000000000;
       if( len > lengthLimit )
       {
-        ROS.Error()( $"TransportPublisherLink length exceeds limit of {lengthLimit}. Dropping connection" );
+        ROS.Error()( $"[{ThisNode.Name}] TransportPublisherLink length exceeds limit of {lengthLimit}. Dropping connection" );
         drop();
         return false;
       }
@@ -173,7 +172,7 @@ namespace Uml.Robotics.Ros
 
     private void onRetryTimer( object o )
     {
-      ROS.Debug()( "TransportPublisherLink: onRetryTimer" );
+      ROS.Debug()( $"[{ThisNode.Name}] TransportPublisherLink: onRetryTimer" );
       if( dropping )
         return;
 

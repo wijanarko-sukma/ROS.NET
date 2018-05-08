@@ -219,7 +219,7 @@ namespace Uml.Robotics.Ros
         }
         return pub;
       }
-      ROS.Error()( "Advertisement of publisher has failed" );
+      ROS.Error()( $"[{ThisNode.Name}] Advertisement of publisher has failed" );
       return null;
     }
 
@@ -485,7 +485,7 @@ namespace Uml.Robotics.Ros
 
     private string resolveName( string name, bool remap, bool novalidate )
     {
-      //ROS.Debug()("resolveName(" + name + ")");
+      //ROS.Debug()( $"resolveName({name})" );
       if( name == "" )
         return Namespace;
 

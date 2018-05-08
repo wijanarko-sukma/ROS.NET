@@ -21,8 +21,7 @@ namespace Uml.Robotics.Ros
     {
       if( !header.Values.ContainsKey( "md5sum" ) || !header.Values.ContainsKey( "service" ) || !header.Values.ContainsKey( "callerid" ) )
       {
-        string bbq = "Error in TcpRos header. Required elements (md5sum, service, callerid) are missing";
-        ROS.Error()( bbq );
+        string bbq = $"[{ThisNode.Name}] Error in TcpRos header. Required elements (md5sum, service, callerid) are missing";
         ROS.Error()( bbq );
         connection.sendHeaderError( ref bbq );
         return false;
@@ -33,14 +32,12 @@ namespace Uml.Robotics.Ros
 
       if( header.Values.ContainsKey( "persistent" ) && ( (string)header.Values["persistent"] == "1" || (string)header.Values["persistent"] == "true" ) )
         persistent = true;
-
-      //ROS.Debug()("Service client [{0}] wants service [{1}] with md5sum [{2}]", client_callerid, service, md5sum);
-      ROS.Debug()( $"Service client [{client_callerid}] wants service [{service}] with md5sum [{md5sum}]" );
+      
+      ROS.Debug()( $"[{ThisNode.Name}] Service client [{client_callerid}] wants service [{service}] with md5sum [{md5sum}]" );
       IServicePublication isp = ServiceManager.Instance.LookupServicePublication( service );
       if( isp == null )
       {
-        string bbq = string.Format( "Received a TcpRos connection for a nonexistent service [{0}]", service );
-        //ROS.Error()(bbq);
+        string bbq = $"[{ThisNode.Name}] Received a TcpRos connection for a nonexistent service [{service}]";
         ROS.Warn()( bbq );
         connection.sendHeaderError( ref bbq );
         return false;
@@ -48,8 +45,7 @@ namespace Uml.Robotics.Ros
 
       if( isp.md5sum != md5sum && md5sum != "*" && isp.md5sum != "*" )
       {
-        string bbq = "Client wants service " + service + " to have md5sum " + md5sum + " but it has " + isp.md5sum + ". Dropping connection";
-        //ROS.Error()(bbq);
+        string bbq = $"[{ThisNode.Name}] Client wants service {service} to have md5sum {md5sum} but it has {isp.md5sum}. Dropping connection";
         ROS.Error()( bbq );
         connection.sendHeaderError( ref bbq );
         return false;
@@ -57,8 +53,7 @@ namespace Uml.Robotics.Ros
 
       if( isp.isDropped )
       {
-        string bbq = "[ERROR] Received a TcpRos connection for a nonexistent service [" + service + "]";
-        //ROS.Error()(bbq);
+        string bbq = $"[{ThisNode.Name}]  Received a TcpRos connection for a nonexistent service [{service}]";
         ROS.Warn()( bbq );
         connection.sendHeaderError( ref bbq );
         return false;
@@ -149,7 +144,7 @@ namespace Uml.Robotics.Ros
       int lengthLimit = 1000000000;
       if( len > lengthLimit )
       {
-        ROS.Error()( $"Message length exceeds limit of {lengthLimit}. Dropping connection." );
+        ROS.Error()( $"[{ThisNode.Name}] Message length exceeds limit of {lengthLimit}. Dropping connection." );
         connection.drop( Connection.DropReason.Destructing );
         return false;
       }

@@ -105,7 +105,7 @@ namespace Uml.Robotics.XmlRpc
         _port = ( (IPEndPoint)listener.Server.LocalEndPoint ).Port;
         _disp.AddSource( this, XmlRpcDispatch.EventType.ReadableEvent );
 
-        Console.WriteLine( "XmlRpcServer::bindAndListen: server listening on port {0}", _port );
+        //Console.WriteLine( "XmlRpcServer::bindAndListen: server listening on port {0}", _port );
       }
       catch( Exception ex )
       {
@@ -131,11 +131,11 @@ namespace Uml.Robotics.XmlRpc
         try
         {
           _disp.AddSource( new XmlRpcServerConnection( listener.AcceptSocketAsync().Result, this ), XmlRpcDispatch.EventType.ReadableEvent );
-          Console.WriteLine( "XmlRpcServer::acceptConnection: creating a connection" );
+          //Console.WriteLine( "XmlRpcServer::acceptConnection: creating a connection" );
         }
         catch( SocketException ex )
         {
-          Console.WriteLine( "XmlRpcServer::acceptConnection: Could not accept connection ({0}).", ex.Message );
+          //Console.WriteLine( "XmlRpcServer::acceptConnection: Could not accept connection ({0}).", ex.Message );
           Thread.Sleep( 10 );
         }
       }
@@ -190,7 +190,7 @@ namespace Uml.Robotics.XmlRpc
       string response = "";
       XmlRpcValue parms = new XmlRpcValue(), resultValue = new XmlRpcValue();
       string methodName = parseRequest( parms, request );
-      Console.WriteLine( "XmlRpcServerConnection::executeRequest: server calling method '{0}'", methodName );
+      //Console.WriteLine( "XmlRpcServerConnection::executeRequest: server calling method '{0}'", methodName );
 
       try
       {
@@ -202,7 +202,7 @@ namespace Uml.Robotics.XmlRpc
       }
       catch( XmlRpcException fault )
       {
-        Console.WriteLine( "XmlRpcServerConnection::executeRequest: fault {0}.", fault.Message );
+        //Console.WriteLine( "XmlRpcServerConnection::executeRequest: fault {0}.", fault.Message );
         response = generateFaultResponse( fault.Message, fault.ErrorCode );
       }
       return response;
@@ -234,7 +234,7 @@ namespace Uml.Robotics.XmlRpc
       string body = RESPONSE_1 + resultXml + RESPONSE_2;
       string header = generateHeader( body );
       string result = header + body;
-      Debug.WriteLine( "XmlRpcServerConnection::generateResponse:\n{0}\n", result );
+      //Debug.WriteLine( "XmlRpcServerConnection::generateResponse:\n{0}\n", result );
       return result;
     }
 

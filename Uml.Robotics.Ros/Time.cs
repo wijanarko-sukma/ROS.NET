@@ -53,7 +53,7 @@ namespace Uml.Robotics.Ros
          }
          catch( Exception e )
          {
-           ROS.Error()( "Caught exception in sim time thread: " + e.Message );
+           ROS.Error()( $"[{ThisNode.Name}] Caught exception in sim time thread: {e.Message}" );
          }
        } ).Start();
     }

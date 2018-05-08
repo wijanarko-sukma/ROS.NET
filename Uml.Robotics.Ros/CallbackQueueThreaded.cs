@@ -81,14 +81,14 @@ namespace Uml.Robotics.Ros
     public void AddCallback( CallbackInterface cb, long owner_id )
     {
       CallbackInfo info = new CallbackInfo { Callback = cb, RemovalId = owner_id };
-      //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: Add callback owner: {owner_id} {cb.ToString()}");
+      //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: Add callback owner: {owner_id} {cb.ToString()}" );
 
       lock( mutex )
       {
         if( !enabled )
           return;
         callbacks.Add( info );
-        //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: Added");
+        //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: Added" );
         count++;
       }
       lock( idInfoMutex )
@@ -116,7 +116,7 @@ namespace Uml.Robotics.Ros
         RemoveAll( ownerId );
       else
       {
-        ROS.Debug()( "removeByID w/ WRONG THREAD ID" );
+        ROS.Debug()( $"[{ThisNode.Name}] removeByID w/ WRONG THREAD ID" );
         RemoveAll( ownerId );
       }
     }
@@ -145,7 +145,7 @@ namespace Uml.Robotics.Ros
         if( remainingTime > TimeSpan.Zero )
           Thread.Sleep( remainingTime );
       }
-      ROS.Debug()( "CallbackQueue thread broke out!" );
+      ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue thread broke out!" );
     }
 
 
@@ -239,7 +239,7 @@ namespace Uml.Robotics.Ros
         if( !sem.WaitOne( timeout ) )
           return;
       }
-      //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: Enqueue TLS");
+      //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: Enqueue TLS" );
       lock( mutex )
       {
         if( count == 0 )
@@ -251,10 +251,10 @@ namespace Uml.Robotics.Ros
         count = 0;
         calling += tls.Count;
       }
-      //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: TLS count {tls.Count}");
+      //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: TLS count {tls.Count}" );
       while( tls.Count > 0 && ROS.ok )
       {
-        //ROS.Debug()($"CallbackQueue@{cbthread.ManagedThreadId}: call {tls.head.Callback.ToString()}");
+        //ROS.Debug()( $"[{ThisNode.Name}] CallbackQueue@{cbthread.ManagedThreadId}: call {tls.head.Callback.ToString()}" );
         if( CallOne( tls ) != CallOneResult.Empty )
           ++called;
       }

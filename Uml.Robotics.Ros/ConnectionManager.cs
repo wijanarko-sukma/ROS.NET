@@ -126,11 +126,10 @@ namespace Uml.Robotics.Ros
       }
       else
       {
-        ROS.Warn()( "Got a connection for a type other than topic or service from [" + conn.RemoteString +
-                      "]." );
+        ROS.Warn()( $"[{ThisNode.Name}] Got a connection for a type other than topic or service from [{conn.RemoteString}]." );
         return false;
       }
-      //ROS.Debug()("CONNECTED [" + val + "]. WIN.");
+      //ROS.Debug()( $"[{ThisNode.Name}] CONNECTED [{val}]. WIN." );
       return ret;
     }
 
@@ -172,7 +171,7 @@ namespace Uml.Robotics.Ros
       {
         foreach( Connection c in localDroppedConnections )
         {
-          ROS.Debug()( "Removing dropped connection: " + c.CallerID );
+          ROS.Debug()( $"[{ThisNode.Name}] Removing dropped connection: {c.CallerID}" );
           connections.Remove( c );
         }
       }

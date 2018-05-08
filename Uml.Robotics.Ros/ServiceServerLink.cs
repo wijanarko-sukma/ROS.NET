@@ -100,7 +100,7 @@ namespace Uml.Robotics.Ros
       if( connection != this.connection )
         throw new ArgumentException( "Unknown connection", nameof( connection ) );
 
-      ROS.Debug()( "Service client from [{0}] for [{1}] dropped", connection.RemoteString, name );
+      ROS.Debug()( $"[{ThisNode.Name}] Service client from [{connection.RemoteString}] for [{name}] dropped" );
 
       clearCalls();
 
@@ -118,8 +118,7 @@ namespace Uml.Robotics.Ros
       }
       else
       {
-        ROS.Error()( "TcpRos header from service server did not have required element: md5sum" );
-        ROS.Error()( "TcpRos header from service server did not have required element: md5sum" );
+        ROS.Error()( $"[{ThisNode.Name}] TcpRos header from service server did not have required element: md5sum" );
         return false;
       }
 
@@ -240,7 +239,7 @@ namespace Uml.Robotics.Ros
 
     private bool onRequestWritten( Connection conn )
     {
-      ROS.Info()( "onRequestWritten(Connection conn)" );
+      ROS.Info()( $"[{ThisNode.Name}] onRequestWritten(Connection conn)" );
       connection.read( 5, onResponseOkAndLength );
       return true;
     }
@@ -265,8 +264,7 @@ namespace Uml.Robotics.Ros
       int lengthLimit = 1000000000;
       if( len > lengthLimit )
       {
-        ROS.Error()( $"Message length exceeds limit of {lengthLimit}. Dropping connection." );
-        ROS.Error()( $"Message length exceeds limit of {lengthLimit}. Dropping connection." );
+        ROS.Error()( $"[{ThisNode.Name}] Message length exceeds limit of {lengthLimit}. Dropping connection." );
         connection.drop( Connection.DropReason.Destructing );
         return false;
       }
@@ -281,7 +279,7 @@ namespace Uml.Robotics.Ros
 
       if( len > 0 )
       {
-        ROS.Debug()( $"Reading message with length of {len}." );
+        ROS.Debug()( $"[{ThisNode.Name}] Reading message with length of {len}." );
         connection.read( len, onResponse );
       }
       else
@@ -353,7 +351,7 @@ namespace Uml.Robotics.Ros
 
       while( !info.finished )
       {
-        ROS.Debug()( "info.finished_condition.WaitOne();" );
+        ROS.Debug()( $"[{ThisNode.Name}] info.finished_condition.WaitOne();" );
         info.finished_condition.WaitOne();
       }
 
@@ -365,8 +363,7 @@ namespace Uml.Robotics.Ros
 
       if( !string.IsNullOrEmpty( info.exception ) )
       {
-        ROS.Error()( "Service call failed: service [{0}] responded with an error: {1}", name, info.exception );
-        ROS.Error()( "Service call failed: service [{0}] responded with an error: {1}", name, info.exception );
+        ROS.Error()( $"[{ThisNode.Name}] Service call failed: service [{name}] responded with an error: {info.exception}" );
       }
       return info.success;
     }
@@ -421,7 +418,7 @@ namespace Uml.Robotics.Ros
         {
           throw;
         }
-        ROS.Error()( $"Exception occurred while calling a {name}, but ROS is not started OR is shutting down\n{ex}" );
+        ROS.Error()( $"[{ThisNode.Name}] Exception occurred while calling a {name}, but ROS is not started OR is shutting down\n{ex}" );
       }
       return result;
     }
