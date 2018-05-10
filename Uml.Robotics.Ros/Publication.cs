@@ -169,7 +169,7 @@ namespace Uml.Robotics.Ros
       if( Md5sum != md5sum && ( md5sum != "*" ) && Md5sum != "*" )
       {
         string datatype = header.Values.ContainsKey( "type" ) ? (string)header.Values["type"] : "unknown";
-        string msg = $"[{ThisNode.Name}] Client [{client_callerid}] wants topic [{topic}] to hava datatype/md5sum [{datatype}/{md5sum}], but our version has [{DataType}/{Md5sum}]. Dropping connection";
+        string msg = $"[{ThisNode.Name}] Client [{client_callerid}] wants topic [{topic}] to have datatype/md5sum [{datatype}/{md5sum}], but our version has [{DataType}/{Md5sum}]. Dropping connection";
         ROS.Warn()( msg );
         error_message = msg;
         return false;

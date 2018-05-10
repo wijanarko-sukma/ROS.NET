@@ -157,7 +157,7 @@ namespace Uml.Robotics.Ros
 
     private bool ValidateFailed( string method, string errorFormat, params object[] args )
     {
-      ROS.Debug()( $"[{ThisNode.Name}] XML-RPC Call [{0}] {1} failed validation", method, string.Format( errorFormat, args ) );
+      ROS.Debug()( $"[{ThisNode.Name}] XML-RPC Call [{method}] {string.Format( errorFormat, args )} failed validation" );
       return false;
     }
 

@@ -115,6 +115,7 @@ namespace Uml.Robotics.Ros
       if( conn != connection || parent == null )
         return;
 
+      ROS.Debug()( $"[{ThisNode.Name}] TransportSubscriberLink: OnConnectionDropped from remote {conn.RemoteString} with reason {reason.ToString()}" );
       lock( parent )
       {
         parent.removeSubscriberLink( this );

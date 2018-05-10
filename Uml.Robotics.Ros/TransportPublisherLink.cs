@@ -71,7 +71,7 @@ namespace Uml.Robotics.Ros
 
     private void onConnectionDropped( Connection conn, Connection.DropReason reason )
     {
-      ROS.Debug()( $"[{ThisNode.Name}] TransportPublisherLink: onConnectionDropped -- {reason}" );
+      ROS.Debug()( $"[{ThisNode.Name}] TransportPublisherLink: onConnectionDropped from remote {conn.RemoteString} with reason {reason.ToString()}" );
 
       if( dropping || conn != connection )
         return;

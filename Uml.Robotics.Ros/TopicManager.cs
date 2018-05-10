@@ -481,7 +481,7 @@ namespace Uml.Robotics.Ros
         }
         else
         {
-          ROS.Warn()( $"[{ThisNode.Name}] An unsupported protocol was offered: [{0}]", proto_name );
+          ROS.Warn()( $"[{ThisNode.Name}] An unsupported protocol was offered: [{proto_name}]" );
         }
       }
 

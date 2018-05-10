@@ -161,7 +161,7 @@ namespace Uml.Robotics.Ros
       {
         if( IsServiceAdvertised( ops.service ) )
         {
-          ROS.Warn()( $"[{ThisNode.Name}] Tried to advertise  a service that is already advertised in this node [{0}]", ops.service );
+          ROS.Warn()( $"[{ThisNode.Name}] Tried to advertise  a service that is already advertised in this node [{ops.service}]" );
           return false;
         }
         if( ops.helper == null )

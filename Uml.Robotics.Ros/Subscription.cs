@@ -229,6 +229,7 @@ namespace Uml.Robotics.Ros
 
       foreach( string i in additions )
       {
+        ROS.Debug()( $"[{ThisNode.Name}] Start connecting to {i} for [{name}]" );
         if( XmlRpcManager.Instance.Uri != i )
         {
           retval &= NegotiateConnection( i );
@@ -319,7 +320,7 @@ namespace Uml.Robotics.Ros
 
       if( !callTask.Result.Success )
       {
-        ROS.Warn()( $"[{ThisNode.Name}] Negotiating for {name} has failed. XML-RCP call failed." );
+        ROS.Warn()( $"[{ThisNode.Name}] Negotiating for {name} has failed. XML-RPC call failed." );
         return;
       }
 

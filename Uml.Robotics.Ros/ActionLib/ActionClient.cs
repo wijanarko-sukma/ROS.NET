@@ -359,6 +359,7 @@ namespace Uml.Robotics.Ros.ActionLib
       int subscriberCount = 0;
       bool subscriberExists = cancelSubscriberCount.TryGetValue( publisher.SubscriberName, out subscriberCount );
       cancelSubscriberCount[publisher.SubscriberName] = ( subscriberExists ? subscriberCount : 0 ) + 1;
+      ROS.Debug()( $"[{ThisNode.Name}] cancelConnectCallback: Adding {publisher.SubscriberName} to cancelSubscribers" );
     }
 
 
@@ -369,11 +370,11 @@ namespace Uml.Robotics.Ros.ActionLib
       if( !subscriberExists )
       {
         // This should never happen. Warning has been copied from official actionlib implementation
-        ROS.Warn()( $"[{ThisNode.Name}] goalDisconnectCallback: Trying to remove {publisher.SubscriberName} from goalSubscribers, but it is not in the goalSubscribers list." );
+        ROS.Warn()( $"[{ThisNode.Name}] cancelDisconnectCallback: Trying to remove {publisher.SubscriberName} from cancelSubscribers, but it is not in the cancelSubscribers list." );
       }
       else
       {
-        ROS.Debug()( $"[{ThisNode.Name}] goalDisconnectCallback: Removing {publisher.SubscriberName} from goalSubscribers, (remaining with same name: {subscriberCount - 1})" );
+        ROS.Debug()( $"[{ThisNode.Name}] cancelDisconnectCallback: Removing {publisher.SubscriberName} from cancelSubscribers, (remaining with same name: {subscriberCount - 1})" );
         if( subscriberCount <= 1 )
         {
           cancelSubscriberCount.Remove( publisher.SubscriberName );
