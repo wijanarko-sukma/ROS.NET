@@ -51,25 +51,31 @@ namespace ActionClientSample
 
     static void Main( string[] args )
     {
+
+      //#if (DEBUG)
+      //      Environment.SetEnvironmentVariable("ROS_MASTER_URI", "http://127.0.0.1:11311/");
+      //#endif
       Console.WriteLine( "Start ROS" );
       ROS.Init( ref args, "ActionClient" );
+
       var asyncSpinner = new AsyncSpinner();
       asyncSpinner.Start();
-      NodeHandle clientNodeHandle = ROS.GlobalNodeHandle;
+
+      NodeHandle clientNodeHandle = new NodeHandle();  //ROS.GlobalNodeHandle;
 
       Console.WriteLine( "Create client" );
       var actionClient = new ActionClient<Messages.actionlib.TestGoal, Messages.actionlib.TestResult,
           Messages.actionlib.TestFeedback>( "test_action", clientNodeHandle );
 
       Console.WriteLine( "Wait for client and server to negotiate connection" );
-      bool started = actionClient.WaitForActionServerToStart( new TimeSpan( 0, 0, 3 ) );
+      bool started = actionClient.WaitForActionServerToStart( new TimeSpan( 0, 0, 30 ) );
 
 
       if( started )
       {
         int counter = 0;
         var dict = new Dictionary<int, Messages.actionlib.TestGoal>();
-        var semaphore = new Semaphore( 10, 10 );
+        var semaphore = new Semaphore( 1, 1 );
 
         while( !Console.KeyAvailable )
         {
@@ -81,7 +87,7 @@ namespace ActionClientSample
           dict[counter] = goal;
           counter += 1;
 
-          Console.WriteLine( $"Send goal {goal.goal} from client" );
+          Console.WriteLine( $"------------------> Send goal {goal.goal} from client" );
           var cts = new CancellationTokenSource();
           actionClient.SendGoalAsync( goal,
               ( goalHandle ) =>
@@ -93,7 +99,7 @@ namespace ActionClientSample
                   var result = goalHandle.Result;
                   if( result != null )
                   {
-                    Console.WriteLine( $"Got Result for goal {g}: {goalHandle.Result.result}" );
+                    Console.WriteLine( $"------------------> Got Result for goal {g}: {goalHandle.Result.result}" );
                   }
                   else
                   {
@@ -104,7 +110,7 @@ namespace ActionClientSample
               },
               ( goalHandle, feedback ) =>
               {
-                Console.WriteLine( $"Feedback: {feedback}" );
+                Console.WriteLine( $"------------------> Got Feedback: {feedback}" );
               },
               cts.Token
           ).GetAwaiter().GetResult();

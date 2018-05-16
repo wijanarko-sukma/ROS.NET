@@ -11,11 +11,17 @@ namespace ActionServerSample
   {
     static void Main( string[] args )
     {
+#if (DEBUG)
+      Environment.SetEnvironmentVariable("ROS_MASTER_URI", "http://192.168.200.32:11311/");
+#endif
       Console.WriteLine( "Start ROS" );
       ROS.Init( ref args, "ActionServer" );
+
       var asyncSpinner = new AsyncSpinner();
       asyncSpinner.Start();
+
       NodeHandle serverNodeHandle = new NodeHandle();
+
       Console.WriteLine( "Create server" );
       var actionServer = new ActionServer<Messages.actionlib.TestGoal, Messages.actionlib.TestResult,
           Messages.actionlib.TestFeedback>( serverNodeHandle, "test_action" );
