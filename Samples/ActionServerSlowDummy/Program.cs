@@ -12,41 +12,61 @@ namespace ActionServerSlowDummy
     static void Main(string[] args)
     {
       //#if (DEBUG)
-      //      Environment.SetEnvironmentVariable("ROS_MASTER_URI", "http://127.0.0.1:11311/");
+      //      Environment.SetEnvironmentVariable("ROS_HOSTNAME", "");
+      //      Environment.SetEnvironmentVariable("ROS_IP", "192.168.200.32");
+      //      Environment.SetEnvironmentVariable("ROS_MASTER_URI", "http://192.168.200.231:11311/");
       //#endif
+      Environment.SetEnvironmentVariable("ROS_HOSTNAME", "localhost");
+      Environment.SetEnvironmentVariable("ROS_IP", "127.0.0.1");
+      Environment.SetEnvironmentVariable("ROS_MASTER_URI", "http://localhost:11311/");
       Console.WriteLine("Start ROS");
       ROS.Init(ref args, "ActionServerSlowDummy");
 
-      var asyncSpinner = new AsyncSpinner();
+      ICallbackQueue callbackQueue = new CallbackQueue();
+
+      var asyncSpinner = new AsyncSpinner(callbackQueue);
       asyncSpinner.Start();
 
-      NodeHandle serverNodeHandle = new NodeHandle();
+      //var spinner = new SingleThreadSpinner(callbackQueue);
+
+
+      NodeHandle serverNodeHandle = new NodeHandle(callbackQueue);
 
       Console.WriteLine("Create server");
       var actionServer = new ActionServer<Messages.actionlib.TestGoal, Messages.actionlib.TestResult,
           Messages.actionlib.TestFeedback>(serverNodeHandle, "test_action_slow");
       Console.WriteLine("Start Server");
+      Param.Set("status_list_timeout", 999.9);
       actionServer.Start();
 
       actionServer.RegisterGoalCallback((goalHandle) =>
       {
         Console.WriteLine($"Goal registered callback. Goal: {goalHandle.Goal.goal}");
-        Thread.Sleep(500);
-        var fb = new Messages.actionlib.TestFeedback();
-        fb.feedback = 10;
-        goalHandle.PublishFeedback(fb);
-        Thread.Sleep(500);
-        var result = new Messages.actionlib.TestResult();
-        result.result = 123;
-        goalHandle.SetGoalStatus(Messages.actionlib_msgs.GoalStatus.SUCCEEDED, "done");
-        actionServer.PublishResult(goalHandle.GoalStatus, result);
+        goalHandle.SetAccepted("accepted");
+
+        new Thread(() =>
+        {
+          for (int x = 0; x < 300; x++)
+          {
+            var fb = new Messages.actionlib.TestFeedback
+            {
+              feedback = x
+            };
+            goalHandle.PublishFeedback(fb);
+            Thread.Sleep(100);
+          }
+
+          var result = new Messages.actionlib.TestResult
+          {
+            result = 123
+          };
+          goalHandle.SetGoalStatus(Messages.actionlib_msgs.GoalStatus.SUCCEEDED, "done");
+          actionServer.PublishResult(goalHandle.GoalStatus, result);
+        }).Start();        
       });
 
-
-      while (!Console.KeyAvailable)
-      {
-        Thread.Sleep(1);
-      }
+      Console.ReadLine();
+      
       actionServer.Shutdown();
       serverNodeHandle.shutdown();
       ROS.shutdown();
