@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Uml.Robotics.Ros
 
     public delegate void SocketUpdateFunc( int stufftodo );
 
-    private static HashSet<Socket> sockets = new HashSet<Socket>();
+    private static ConcurrentDictionary<int, Socket> sockets = new ConcurrentDictionary<int, Socket>();
 
     public PollSet()
         : base( null )
@@ -41,19 +42,17 @@ namespace Uml.Robotics.Ros
     public bool AddSocket( Socket socket, SocketUpdateFunc updateFunc, TcpTransport transport )
     {
       socket.Info = new Socket.SocketInfo { Func = updateFunc, Transport = transport };
-      lock( sockets )
-      {
-        sockets.Add( socket );
-      }
+
+      var socketHash = socket.GetHashCode();
+      if (sockets.ContainsKey(socketHash))
+        sockets[socketHash].Dispose();
+      sockets[socketHash] = socket;
       return true;
     }
 
     public bool RemoveSocket( Socket socket )
     {
-      lock( sockets )
-      {
-        sockets.Remove( socket );
-      }
+      sockets.TryRemove( socket.GetHashCode(), out var dummy );
       socket.Dispose();
       return true;
     }
@@ -86,7 +85,7 @@ namespace Uml.Robotics.Ros
 
       lock ( sockets )
       {
-        foreach( Socket s in sockets )
+        foreach( Socket s in sockets.Values )
         {
           lsocks.Add( s );
           if( ( s.Info.Events & Socket.POLLIN ) != 0 )
