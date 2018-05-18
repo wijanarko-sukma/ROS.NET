@@ -37,8 +37,9 @@ namespace Uml.Robotics.Ros
           continue;
         }
 
-        RosService service = Activator.CreateInstance( type ) as RosService;
-        if( service.ServiceType == "undefined/unknown" )
+        //RosService service = Activator.CreateInstance( type ) as RosService;
+        RosService service = type.GetInstance() as RosService;
+        if ( service.ServiceType == "undefined/unknown" )
         {
           throw new Exception( "Invalid servive type. Service type field (srvtype) was not initialized correctly." );
         }

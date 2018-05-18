@@ -230,7 +230,7 @@ namespace Uml.Robotics.Ros
 
     public static T GetTime<T>( TimeSpan ts ) where T : RosMessage, new()
     {
-      T test = Activator.CreateInstance( typeof( T ), GetTime( ts ) ) as T;
+      T test = typeof(T).GetInstance(GetTime(ts)) as T;
       return test;
     }
 

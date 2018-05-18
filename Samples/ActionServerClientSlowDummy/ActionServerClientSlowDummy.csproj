@@ -4,16 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FE6B7734-BD13-4F75-AA2C-9E8E314053F0}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Uml.Robotics.Ros.MessageBase</RootNamespace>
-    <AssemblyName>Uml.Robotics.Ros.MessageBase</AssemblyName>
+    <ProjectGuid>{02B190B3-029F-4968-AF6C-4E7A52187065}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ActionServerClientSlowDummy</RootNamespace>
+    <AssemblyName>ActionServerClientSlowDummy</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -31,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Messages">
+      <HintPath>..\..\Messages\Messages.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,35 +45,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="actionlib_msgs\GoalID.cs" />
-    <Compile Include="actionlib_msgs\GoalStatus.cs" />
-    <Compile Include="actionlib_msgs\GoalStatusArray.cs" />
-    <Compile Include="Attributes.cs" />
-    <Compile Include="FeedbackActionMessage.cs" />
-    <Compile Include="geometry_msgs\Quaternion.cs" />
-    <Compile Include="geometry_msgs\Transform.cs" />
-    <Compile Include="geometry_msgs\TransformStamped.cs" />
-    <Compile Include="geometry_msgs\Vector3.cs" />
-    <Compile Include="GoalActionMessage.cs" />
-    <Compile Include="InnerActionMessage.cs" />
-    <Compile Include="MessageTypeRegistry.cs" />
-    <Compile Include="multimaster_msgs_fkie\Capability.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResultActionMessage.cs" />
-    <Compile Include="rosgraph_msgs\Clock.cs" />
-    <Compile Include="rosgraph_msgs\Log.cs" />
-    <Compile Include="RosMessage.cs" />
-    <Compile Include="RosService.cs" />
-    <Compile Include="ServiceTypeRegistry.cs" />
-    <Compile Include="std_msgs\Duration.cs" />
-    <Compile Include="std_msgs\Header.cs" />
-    <Compile Include="std_msgs\String.cs" />
-    <Compile Include="std_msgs\Time.cs" />
-    <Compile Include="tf\tfMessage.cs" />
-    <Compile Include="TimeData.cs" />
-    <Compile Include="TypeExtensions.cs" />
-    <Compile Include="TypeRegistryBase.cs" />
-    <Compile Include="WrappedFeedbackMessage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Uml.Robotics.Ros.MessageBase\Uml.Robotics.Ros.MessageBase.csproj">
+      <Project>{fe6b7734-bd13-4f75-aa2c-9e8e314053f0}</Project>
+      <Name>Uml.Robotics.Ros.MessageBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Uml.Robotics.Ros\Uml.Robotics.Ros.csproj">
+      <Project>{c8e5c1d2-80c2-4c11-acf2-2dc3b7560bef}</Project>
+      <Name>Uml.Robotics.Ros</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Uml.Robotics.XmlRpc\Uml.Robotics.XmlRpc.csproj">
+      <Project>{cfd4a5b7-67f9-474a-a6b9-b9d7de16282d}</Project>
+      <Name>Uml.Robotics.XmlRpc</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

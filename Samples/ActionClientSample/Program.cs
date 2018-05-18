@@ -51,49 +51,56 @@ namespace ActionClientSample
 
     static void Main( string[] args )
     {
+      Environment.SetEnvironmentVariable("ROS_HOSTNAME", "localhost");
+      Environment.SetEnvironmentVariable("ROS_IP", "127.0.0.1");
+      Environment.SetEnvironmentVariable("ROS_MASTER_URI", "http://localhost:11311/");
+
       Console.WriteLine( "Start ROS" );
       ROS.Init( ref args, "ActionClient" );
-      var asyncSpinner = new AsyncSpinner();
+
+      ICallbackQueue callbackQueue = new CallbackQueue();
+
+      var asyncSpinner = new AsyncSpinner(callbackQueue);
       asyncSpinner.Start();
-      NodeHandle clientNodeHandle = ROS.GlobalNodeHandle;
+
+      NodeHandle clientNodeHandle = new NodeHandle(callbackQueue);  //ROS.GlobalNodeHandle;
 
       Console.WriteLine( "Create client" );
       var actionClient = new ActionClient<Messages.actionlib.TestGoal, Messages.actionlib.TestResult,
           Messages.actionlib.TestFeedback>( "test_action", clientNodeHandle );
 
       Console.WriteLine( "Wait for client and server to negotiate connection" );
-      bool started = actionClient.WaitForActionServerToStart( new TimeSpan( 0, 0, 3 ) );
+      bool started = actionClient.WaitForActionServerToStart( new TimeSpan( 0, 0, 60 ) );
 
 
       if( started )
       {
         int counter = 0;
         var dict = new Dictionary<int, Messages.actionlib.TestGoal>();
-        var semaphore = new Semaphore( 10, 10 );
 
         while( !Console.KeyAvailable )
         {
           var now = DateTime.UtcNow;
-          semaphore.WaitOne();
           Console.WriteLine( $"Waited: {DateTime.UtcNow - now}" );
-          var goal = new Messages.actionlib.TestGoal();
-          goal.goal = counter;
+          var goal = new Messages.actionlib.TestGoal
+          {
+            goal = counter
+          };
           dict[counter] = goal;
           counter += 1;
 
-          Console.WriteLine( $"Send goal {goal.goal} from client" );
+          Console.WriteLine( $"------------------> Send goal {goal.goal} from client" );
           var cts = new CancellationTokenSource();
-          actionClient.SendGoalAsync( goal,
+          var goalTask = actionClient.SendGoalAsync( goal,
               ( goalHandle ) =>
               {
                 if( goalHandle.State == CommunicationState.DONE )
                 {
-                  semaphore.Release();
                   int g = goalHandle.Goal.Goal.goal;
-                  var result = goalHandle.Result;
-                  if( result != null )
+                  var resultt = goalHandle.Result;
+                  if( resultt != null )
                   {
-                    Console.WriteLine( $"Got Result for goal {g}: {goalHandle.Result.result}" );
+                    Console.WriteLine( $"------------------> Got Result for goal {g}: {resultt.result}" );
                   }
                   else
                   {
@@ -104,11 +111,20 @@ namespace ActionClientSample
               },
               ( goalHandle, feedback ) =>
               {
-                Console.WriteLine( $"Feedback: {feedback}" );
+                Console.WriteLine( $"------------------> Got Feedback: {feedback.Feedback.feedback}" );
               },
               cts.Token
-          ).GetAwaiter().GetResult();
-        }
+          );
+
+          var waiter = goalTask.GetAwaiter();
+          goalTask.Wait();
+          
+          Console.ReadLine();
+
+          while (!waiter.IsCompleted) Thread.Yield();
+          var result = waiter.GetResult();
+          break;
+        }        
 
         Console.WriteLine( "Wait for 15s for open goals" );
         var timeOut = new TimeSpan( 0, 0, 15 );
@@ -124,7 +140,7 @@ namespace ActionClientSample
         else
         {
           Console.WriteLine( "TIMEOUT: There are still open goals" );
-        }
+        }        
       }
       else
       {

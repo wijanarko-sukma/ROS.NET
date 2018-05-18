@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -21,13 +22,13 @@ namespace Uml.Robotics.Ros
 
     internal static void Reset()
     {
-      instance = new Lazy<XmlRpcManager>( LazyThreadSafetyMode.ExecutionAndPublication );
+      instance = new Lazy<XmlRpcManager>(LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
-    private static Lazy<XmlRpcManager> instance = new Lazy<XmlRpcManager>( LazyThreadSafetyMode.ExecutionAndPublication );
-    
-    private Dictionary<string, XmlRpcServerMethod> functions = new Dictionary<string, XmlRpcServerMethod>();
-    private object functionsGate = new object();
+    private static Lazy<XmlRpcManager> instance = new Lazy<XmlRpcManager>(LazyThreadSafetyMode.ExecutionAndPublication);
+
+    private ConcurrentDictionary<string, XmlRpcServerMethod> functions = new ConcurrentDictionary<string, XmlRpcServerMethod>();
+    //private object functionsGate = new object();
     private XmlRpcFunc getPid;
     private XmlRpcServer server;
     private Thread serverThread;
@@ -36,35 +37,35 @@ namespace Uml.Robotics.Ros
     private int port;
 
 
-    public static Action<XmlRpcValue> ResponseStr( IntPtr target, int code, string msg, string response )
+    public static Action<XmlRpcValue> ResponseStr(IntPtr target, int code, string msg, string response)
     {
-      return ( XmlRpcValue v ) =>
+      return (XmlRpcValue v) =>
       {
-        v.Set( 0, code );
-        v.Set( 1, msg );
-        v.Set( 2, response );
+        v.Set(0, code);
+        v.Set(1, msg);
+        v.Set(2, response);
       };
     }
 
 
-    public static Action<XmlRpcValue> ResponseInt( int code, string msg, int response )
+    public static Action<XmlRpcValue> ResponseInt(int code, string msg, int response)
     {
-      return ( XmlRpcValue v ) =>
+      return (XmlRpcValue v) =>
       {
-        v.Set( 0, code );
-        v.Set( 1, msg );
-        v.Set( 2, response );
+        v.Set(0, code);
+        v.Set(1, msg);
+        v.Set(2, response);
       };
     }
 
 
-    public static Action<XmlRpcValue> ResponseBool( int code, string msg, bool response )
+    public static Action<XmlRpcValue> ResponseBool(int code, string msg, bool response)
     {
-      return ( XmlRpcValue v ) =>
+      return (XmlRpcValue v) =>
       {
-        v.Set( 0, code );
-        v.Set( 1, msg );
-        v.Set( 2, response );
+        v.Set(0, code);
+        v.Set(1, msg);
+        v.Set(2, response);
       };
     }
 
@@ -72,7 +73,7 @@ namespace Uml.Robotics.Ros
     public XmlRpcManager()
     {
       this.server = new XmlRpcServer();
-      this.getPid = ( parms, result ) => ResponseInt( 1, "", Process.GetCurrentProcess().Id )( result );
+      this.getPid = (parms, result) => ResponseInt(1, "", Process.GetCurrentProcess().Id)(result);
     }
 
 
@@ -96,47 +97,48 @@ namespace Uml.Robotics.Ros
 
     private void ServerThreadFunc()
     {
-      while( !shuttingDown )
+      while (!shuttingDown)
       {
-        if( server.Dispatch == null )
+        if (server.Dispatch == null)
         {
-          throw new NullReferenceException( "XmlRpcManager is not initialized yet!" );
+          throw new NullReferenceException("XmlRpcManager is not initialized yet!");
         }
 
-        lock( functionsGate )
-        {
-          server.Work( TimeSpan.FromMilliseconds( 1 ) );
-        }
+        //lock( functionsGate )
+        //{
+        Thread.Yield();
+        server.Work(TimeSpan.FromMilliseconds(1));
+        //}
       }
     }
 
 
-    public bool ValidateXmlRpcResponse( string method, XmlRpcValue response, XmlRpcValue payload )
+    public bool ValidateXmlRpcResponse(string method, XmlRpcValue response, XmlRpcValue payload)
     {
-      if( response.Type != XmlRpcType.Array )
-        return ValidateFailed( method, "didn't return an array -- {0}", response );
-      if( response.Count != 3 )
-        return ValidateFailed( method, "didn't return a 3-element array -- {0}", response );
-      if( response[0].Type != XmlRpcType.Int )
-        return ValidateFailed( method, "didn't return an int as the 1st element -- {0}", response );
+      if (response.Type != XmlRpcType.Array)
+        return ValidateFailed(method, "didn't return an array -- {0}", response);
+      if (response.Count != 3)
+        return ValidateFailed(method, "didn't return a 3-element array -- {0}", response);
+      if (response[0].Type != XmlRpcType.Int)
+        return ValidateFailed(method, "didn't return an int as the 1st element -- {0}", response);
       int status_code = response[0].GetInt();
-      if( response[1].Type != XmlRpcType.String )
-        return ValidateFailed( method, "didn't return a string as the 2nd element -- {0}", response );
+      if (response[1].Type != XmlRpcType.String)
+        return ValidateFailed(method, "didn't return a string as the 2nd element -- {0}", response);
 
       string status_string = response[1].GetString();
-      if( status_code != 1 )
+      if (status_code != 1)
       {
-        return ValidateFailed( method, "returned an error ({0}): [{1}] -- {2}", status_code, status_string, response );
+        return ValidateFailed(method, "returned an error ({0}): [{1}] -- {2}", status_code, status_string, response);
       }
 
-      switch( response[2].Type )
+      switch (response[2].Type)
       {
         case XmlRpcType.Array:
           {
-            payload.SetArray( 0 );
-            for( int i = 0; i < response[2].Count; i++ )
+            payload.SetArray(0);
+            for (int i = 0; i < response[2].Count; i++)
             {
-              payload.Set( i, response[2][i] );
+              payload.Set(i, response[2][i]);
             }
           }
           break;
@@ -144,46 +146,46 @@ namespace Uml.Robotics.Ros
         case XmlRpcType.Double:
         case XmlRpcType.String:
         case XmlRpcType.Boolean:
-          payload.Copy( response[2] );
+          payload.Copy(response[2]);
           break;
         case XmlRpcType.Empty:
           break;
         default:
-          throw new ArgumentException( "Unhandled valid XML-RPC payload type: " + response[2].Type, nameof( response ) );
+          throw new ArgumentException("Unhandled valid XML-RPC payload type: " + response[2].Type, nameof(response));
       }
       return true;
     }
 
 
-    private bool ValidateFailed( string method, string errorFormat, params object[] args )
+    private bool ValidateFailed(string method, string errorFormat, params object[] args)
     {
-      ROS.Debug()( $"[{ThisNode.Name}] XML-RPC Call [{method}] {string.Format( errorFormat, args )} failed validation" );
+      ROS.Debug()($"[{ThisNode.Name}] XML-RPC Call [{method}] {string.Format(errorFormat, args)} failed validation");
       return false;
     }
 
 
-    public bool Bind( string functionName, XmlRpcFunc callback )
+    public bool Bind(string functionName, XmlRpcFunc callback)
     {
-      lock( functionsGate )
-      {
-        if( functions.ContainsKey( functionName ) )
-          return false;
+      //lock( functionsGate )
+      //{
+      if (functions.ContainsKey(functionName))
+        return false;
 
-        var method = new XmlRpcServerMethod( server, functionName, callback );
-        functions.Add( functionName, method );
-        server.AddMethod( method );
-      }
-
+      var method = new XmlRpcServerMethod(server, functionName, callback);
+      functions[functionName] = method;
+      server.AddMethod(method);
+      //    }
       return true;
     }
 
 
-    public void Unbind( string functionName )
+    public void Unbind(string functionName)
     {
-      lock( functionsGate )
-      {
-        functions.Remove( functionName );
-      }
+      //lock( functionsGate )
+      //{
+      XmlRpcServerMethod dummy;
+      functions.TryRemove(functionName, out dummy);
+      //}
     }
 
 
@@ -223,17 +225,17 @@ namespace Uml.Robotics.Ros
 
     internal void Shutdown()
     {
-      if( shuttingDown )
+      if (shuttingDown)
         return;
 
       shuttingDown = true;
       serverThread.Join();
       server.Shutdown();
 
-      lock( functionsGate )
-      {
-        functions.Clear();
-      }
+      //lock( functionsGate )
+      //{
+      functions.Clear();
+      //}
 
       //ROS.Debug()( $"[{ThisNode.Name}] XmlRpc Server shutted down." );
     }

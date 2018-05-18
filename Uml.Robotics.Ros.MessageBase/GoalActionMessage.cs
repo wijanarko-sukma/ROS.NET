@@ -45,7 +45,8 @@ namespace Uml.Robotics.Ros
     {
       Header = new Messages.std_msgs.Header( serializedMessage, ref currentIndex );
       GoalId = new Messages.actionlib_msgs.GoalID( serializedMessage, ref currentIndex );
-      Goal = (TGoal)Activator.CreateInstance( typeof( TGoal ), serializedMessage, currentIndex );
+      Goal = (TGoal)typeof(TGoal).GetInstance();
+      Goal.Deserialize(serializedMessage, ref currentIndex);
     }
 
     public override string MessageDefinition()
