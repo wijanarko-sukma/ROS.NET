@@ -67,12 +67,12 @@ namespace Uml.Robotics.Ros
           }
           Type[] innerType = { othertype };
           var goalMessageType = actionType.MakeGenericType( innerType );
-          message = ( Activator.CreateInstance( goalMessageType ) ) as RosMessage;
+          message = goalMessageType.GetInstance() as RosMessage;
         }
         else
         {
-          message = Activator.CreateInstance( othertype ) as RosMessage;
-          if( ( message != null ) && ( message.MessageType == "undefined/unknown" ) )
+          message = othertype.GetInstance() as RosMessage;
+          if ( ( message != null ) && ( message.MessageType == "undefined/unknown" ) )
           {
             throw new Exception( "Invalid message type. Message type field (msgtype) was not initialized correctly." );
           }

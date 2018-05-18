@@ -67,6 +67,7 @@
     <Compile Include="std_msgs\Time.cs" />
     <Compile Include="tf\tfMessage.cs" />
     <Compile Include="TimeData.cs" />
+    <Compile Include="TypeExtensions.cs" />
     <Compile Include="TypeRegistryBase.cs" />
     <Compile Include="WrappedFeedbackMessage.cs" />
   </ItemGroup>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace Uml.Robotics.Ros
@@ -26,7 +25,8 @@ namespace Uml.Robotics.Ros
       bool typeExist = TypeRegistry.TryGetValue( rosType, out Type type );
       if( typeExist )
       {
-        result = Activator.CreateInstance( type ) as T;
+        //result = Activator.CreateInstance( type ) as T;
+        result = type.GetInstance() as T;
       }
 
       return result;

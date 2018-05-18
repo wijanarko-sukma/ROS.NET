@@ -72,14 +72,19 @@ namespace Uml.Robotics.Ros
       return true;
     }
 
+    List<System.Net.Sockets.Socket> checkWrite = new List<System.Net.Sockets.Socket>();
+    List<System.Net.Sockets.Socket> checkRead = new List<System.Net.Sockets.Socket>();
+    List<System.Net.Sockets.Socket> checkError = new List<System.Net.Sockets.Socket>();
+    List<Uml.Robotics.Ros.Socket> lsocks = new List<Uml.Robotics.Ros.Socket>();
+
     public void Update()
     {
-      var checkWrite = new List<System.Net.Sockets.Socket>();
-      var checkRead = new List<System.Net.Sockets.Socket>();
-      var checkError = new List<System.Net.Sockets.Socket>();
-      var lsocks = new List<Uml.Robotics.Ros.Socket>();
+      checkWrite.Clear();
+      checkRead.Clear();
+      checkError.Clear();
+      lsocks.Clear();
 
-      lock( sockets )
+      lock ( sockets )
       {
         foreach( Socket s in sockets )
         {

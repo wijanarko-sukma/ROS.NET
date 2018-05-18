@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace Uml.Robotics.XmlRpc
 {
@@ -46,32 +47,55 @@ namespace Uml.Robotics.XmlRpc
       }
     }
 
+    List<Socket> checkRead = new List<Socket>();
+    List<Socket> checkWrite = new List<Socket>();
+    List<Socket> checkError = new List<Socket>();
+
 
     private void CheckSources( IEnumerable<DispatchRecord> sources, TimeSpan timeout, List<XmlRpcSource> toRemove )
     {
       const EventType ALL_EVENTS = EventType.ReadableEvent | EventType.WritableEvent | EventType.Exception;
 
-      var checkRead = new List<Socket>();
-      var checkWrite = new List<Socket>();
-      var checkError = new List<Socket>();
-
-      foreach( var src in sources )
+      checkRead.Clear();
+      checkWrite.Clear();
+      checkError.Clear();
+      //int a = 0, b = 0, c = 0, d = sources.Count();
+      foreach ( var src in sources )
       {
-        var sock = src.Client.getSocket();
+        Socket sock = src.Client.getSocket();
         if( sock == null )
           continue;
 
+        //if (!sock.Connected)
+        //continue;
+
+        //bool isValidConnection = sock.Connected || (!sock.Connected && sock.LocalEndPoint.ToString().StartsWith("0.0.0.0"));
+        //if (!isValidConnection)
+        //  continue;
+
+        
         var mask = src.Mask;
-        if( mask.HasFlag( EventType.ReadableEvent ) )
-          checkRead.Add( sock );
-        if( mask.HasFlag( EventType.WritableEvent ) )
-          checkWrite.Add( sock );
-        if( mask.HasFlag( EventType.Exception ) )
-          checkError.Add( sock );
+        if (mask.HasFlag(EventType.ReadableEvent))
+        {
+          checkRead.Add(sock);
+          //a++;
+        }
+        if (mask.HasFlag(EventType.WritableEvent))
+        {
+          checkWrite.Add(sock);
+          //b++;
+        }
+        if (mask.HasFlag(EventType.Exception))
+        {
+          checkError.Add(sock);
+          //c++;
+        }
       }
 
       // Check for events
       Socket.Select( checkRead, checkWrite, checkError, (int)( timeout.Milliseconds * 1000.0 ) );
+      //Thread.Yield();
+      //Console.WriteLine($"{d} - {a} - {b} - {c}");
 
       if( checkRead.Count + checkWrite.Count + checkError.Count == 0 )
         return;
@@ -108,11 +132,10 @@ namespace Uml.Robotics.XmlRpc
     public void Work( TimeSpan timeSlice )
     {
       var endTime = DateTime.UtcNow.Add( timeSlice );
-
-      while( sources.Count > 0 )
+      var toRemove = new List<XmlRpcSource>();
+      while ( sources.Count > 0 )
       {
-        var sourcesCopy = sources.GetRange( 0, sources.Count );
-        var toRemove = new List<XmlRpcSource>();
+        var sourcesCopy = sources.GetRange( 0, sources.Count );        
         CheckSources( sourcesCopy, timeSlice, toRemove );
 
         foreach( var src in toRemove )
@@ -121,10 +144,11 @@ namespace Uml.Robotics.XmlRpc
           if( !src.KeepOpen )
             src.Close();
         }
+        toRemove.Clear();
 
         // check whether end time has been passed
-        if( DateTime.UtcNow > endTime )
-          break;
+        if ( DateTime.UtcNow > endTime )
+          break;        
       }
     }
 

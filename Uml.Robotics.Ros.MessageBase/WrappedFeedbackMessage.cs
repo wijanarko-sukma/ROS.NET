@@ -34,7 +34,9 @@ namespace Uml.Robotics.Ros
     {
       Header = new std_msgs.Header( serializedMessage, ref currentIndex );
       GoalStatus = new actionlib_msgs.GoalStatus( serializedMessage, ref currentIndex );
-      Content = (T)Activator.CreateInstance( typeof( T ), serializedMessage, currentIndex );
+      //Content = (T)Activator.CreateInstance( typeof( T ), serializedMessage, currentIndex );
+      Content = (T)typeof(T).GetInstance();
+      Content.Deserialize(serializedMessage, ref currentIndex);
     }
 
     public override byte[] Serialize( bool partofsomethingelse )
