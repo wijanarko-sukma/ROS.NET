@@ -46,7 +46,7 @@ namespace ActionServerSlowDummy
 
         new Thread(() =>
         {
-          for (int x = 0; x < 300; x++)
+          for (int x = 0; x < 77; x++)
           {
             var fb = new Messages.actionlib.TestFeedback
             {
